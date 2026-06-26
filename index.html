@@ -4,292 +4,654 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS Citation Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.16/tailwind.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .toast { transition: opacity 0.3s ease-in-out; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .toast-enter { animation: slideUp 0.25s ease-out; }
+        @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .tag-pill { transition: all 0.15s ease; }
+        .tag-pill:hover { transform: translateY(-1px); }
+        input[type="checkbox"] { accent-color: #1e3a8a; }
+        .citation-card { transition: box-shadow 0.15s ease; }
+        .citation-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .storage-badge { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); }
+        details > summary { list-style: none; cursor: pointer; }
+        details > summary::-webkit-details-marker { display: none; }
+        .char-warning { color: #dc2626; }
+        select, input, textarea { outline: none; }
+        select:focus, input:focus, textarea:focus { border-color: #1e3a8a !important; box-shadow: 0 0 0 3px rgba(30,58,138,0.12); }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-6 md:p-12 text-slate-900">
+<body class="bg-slate-50 min-h-screen text-slate-900">
 
-    <header class="max-w-4xl mx-auto mb-8 border-b pb-6">
-        <h1 class="text-2xl font-black text-blue-900 tracking-tight uppercase">EPS Citation Generator</h1>
+<!-- Storage Status Banner -->
+<div id="storage-banner" class="storage-badge text-white text-xs font-bold px-4 py-2 flex items-center gap-2 justify-center">
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
+    <span id="storage-status">Connecting to persistent storage...</span>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 py-8 md:px-6">
+
+    <!-- Header -->
+    <header class="mb-8">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-1">EPS Learning</p>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Citation Generator</h1>
+                <p class="text-slate-500 text-sm mt-1">Build, tag, and export curriculum alignment citations</p>
+            </div>
+            <div class="text-right">
+                <div id="citation-counter" class="text-3xl font-black text-blue-900">0</div>
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saved</div>
+            </div>
+        </div>
     </header>
 
-    <main class="max-w-4xl mx-auto space-y-12">
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+    <!-- Builder Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-xs font-black text-slate-700 uppercase tracking-widest">Build Citation</h2>
+            <button onclick="clearForm()" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors">Clear Form</button>
+        </div>
+
+        <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- Program -->
                 <div class="md:col-span-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">EPS Program Name</label>
-                    <input id="program" list="program-list" class="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="Start typing or select program...">
+                    <label class="field-label">EPS Program Name</label>
+                    <input id="program" list="program-list" class="field-input w-full" placeholder="Start typing or select program...">
                     <datalist id="program-list"></datalist>
                 </div>
 
-                <div class="flex flex-col gap-1.5 w-full">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Standards Code (Optional)</label>
-                    <input id="standards" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="e.g., RI.4.1">
+                <!-- Standards -->
+                <div>
+                    <label class="field-label">Standards Code <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
+                    <input id="standards" class="field-input w-full" placeholder="e.g., RI.4.1, RF.2.3b">
                 </div>
 
-                <div class="flex flex-col gap-1.5 w-full">
-                    <div class="flex justify-between items-end">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Material Type</label>
-                        <label class="flex items-center gap-1 text-[9px] font-bold text-slate-600 cursor-pointer">
-                            <input type="checkbox" id="abbr-check"> ABBREVIATE
+                <!-- Material Type -->
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="field-label mb-0">Material Type</label>
+                        <label class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer">
+                            <input type="checkbox" id="abbr-check" class="w-3 h-3"> Abbreviate
                         </label>
                     </div>
-                    <input id="material" list="material-list" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="Select or type material...">
+                    <input id="material" list="material-list" class="field-input w-full" placeholder="Select or type material...">
                     <datalist id="material-list"></datalist>
                 </div>
 
+                <!-- Dynamic Program Fields -->
                 <div id="dynamic-fields" class="contents"></div>
-                
-                <div class="flex flex-col gap-1.5 w-full">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Page Number(s)</label>
-                    <input id="page" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="e.g., 42 or 64-68">
+
+                <!-- Page Numbers -->
+                <div>
+                    <label class="field-label">Page Number(s)</label>
+                    <input id="page" class="field-input w-full" placeholder="e.g., 42 or 64–68">
                 </div>
 
-                <div class="flex flex-col gap-1.5 w-full">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Format (Optional)</label>
-                    <select id="format" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
-                        <option value="">Select Option</option>
-                        <option value="Digital">Digital</option><option value="Print">Print</option><option value="Hybrid">Hybrid</option>
+                <!-- Format -->
+                <div>
+                    <label class="field-label">Format <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
+                    <select id="format" class="field-input w-full">
+                        <option value="">Select...</option>
+                        <option>Digital</option><option>Print</option><option>Hybrid</option>
                     </select>
                 </div>
 
-                <div class="flex flex-col gap-1.5 w-full">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Delivery Method (Optional)</label>
-                    <select id="delivery" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
-                        <option value="">Select Option</option>
-                        <option value="Whole Group">Whole Group</option><option value="Small Group">Small Group</option><option value="Direct Instruction">Direct Instruction</option><option value="Independent Practice">Independent Practice</option>
+                <!-- Delivery -->
+                <div>
+                    <label class="field-label">Delivery Method <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
+                    <select id="delivery" class="field-input w-full">
+                        <option value="">Select...</option>
+                        <option>Whole Group</option><option>Small Group</option><option>Direct Instruction</option><option>Independent Practice</option>
                     </select>
                 </div>
 
-                <div class="flex flex-col gap-1.5 w-full">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Audience</label>
-                    <select id="audience" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
-                        <option value="">Select Option</option>
-                        <option value="Teacher">Teacher</option><option value="Student">Student</option>
+                <!-- Audience -->
+                <div>
+                    <label class="field-label">Audience</label>
+                    <select id="audience" class="field-input w-full">
+                        <option value="">Select...</option>
+                        <option>Teacher</option><option>Student</option>
                     </select>
                 </div>
 
-                <div class="flex flex-col gap-1.5 w-full">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Evidence Type</label>
-                    <select id="evidence" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
-                        <option value="">Select Option</option>
-                        <option value="Narrative">Narrative</option><option value="Activity">Activity</option>
+                <!-- Evidence Type -->
+                <div>
+                    <label class="field-label">Evidence Type</label>
+                    <select id="evidence" class="field-input w-full">
+                        <option value="">Select...</option>
+                        <option>Narrative</option><option>Activity</option>
                     </select>
                 </div>
 
+                <!-- URL -->
                 <div class="md:col-span-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Evidence Web Link (URL)</label>
-                    <input id="url" class="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-sm mt-1" placeholder="https://...">
+                    <label class="field-label">Evidence Web Link <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
+                    <input id="url" class="field-input w-full" placeholder="https://...">
                 </div>
 
+                <!-- Directions -->
                 <div class="md:col-span-2">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Short directions to locate cited evidence, where to look in the material, and/or cross-reference to other material type</label>
-                    <textarea id="directions" class="w-full p-3 border border-slate-300 rounded-md h-20 text-sm"></textarea>
+                    <div class="flex justify-between items-end mb-1">
+                        <label class="field-label mb-0">Location Notes & Cross-References</label>
+                        <span id="char-count" class="text-[10px] text-slate-400 font-mono">0 / 300</span>
+                    </div>
+                    <textarea id="directions" class="field-input w-full h-20 resize-none" maxlength="300" placeholder="Short directions to locate cited evidence, where to look in the material, and/or cross-reference to other material type..."></textarea>
                 </div>
             </div>
 
-            <div class="bg-slate-900 p-6 rounded-lg mt-8 text-white shadow-inner">
-                <p class="text-[10px] font-black text-slate-400 mb-2 uppercase">Live Preview</p>
-                <p id="preview-text" class="text-sm font-medium leading-relaxed">Citation will appear here...</p>
+            <!-- Live Preview -->
+            <div class="bg-slate-900 p-5 rounded-xl mt-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Preview</p>
+                </div>
+                <p id="preview-text" class="text-sm font-medium leading-relaxed text-white">Citation will appear here as you fill in fields above...</p>
             </div>
 
-            <div class="flex gap-3 mt-6">
-                <button onclick="handleCopy()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold text-xs uppercase hover:bg-slate-200 flex items-center gap-2"><i data-lucide="copy" class="w-3 h-3"></i>Copy</button>
-                <button onclick="handleSave()" class="px-4 py-2 bg-blue-800 text-white rounded-lg font-bold text-xs uppercase hover:bg-blue-900 flex items-center gap-2"><i data-lucide="file-text" class="w-3 h-3"></i>Save Citation</button>
+            <div class="flex gap-3 mt-5">
+                <button onclick="handleCopy()" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs uppercase hover:bg-slate-200 transition-colors flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+                    Copy
+                </button>
+                <button onclick="handleSave()" class="px-5 py-2.5 bg-blue-900 text-white rounded-xl font-black text-xs uppercase hover:bg-blue-800 transition-colors flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Save Citation
+                </button>
+            </div>
+
+            <!-- Tags — below actions so they don't imply tags affect the citation text -->
+            <div class="mt-5 pt-5 border-t border-slate-100">
+                <label class="field-label mb-2">Tags <span class="text-slate-400 font-normal normal-case">(applied when saved)</span></label>
+                <div class="flex gap-2 flex-wrap mb-2 min-h-6" id="form-tags"></div>
+                <div class="flex gap-2">
+                    <input id="tag-input" class="field-input flex-1" placeholder="Add a tag (e.g., Grade 3, Phonics, RFP-2024)..." maxlength="30">
+                    <button onclick="addFormTag()" class="px-4 py-2 bg-amber-400 text-slate-900 rounded-lg font-black text-xs uppercase hover:bg-amber-300 transition-colors whitespace-nowrap">+ Add Tag</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Library -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xs font-black text-slate-700 uppercase tracking-widest">Saved Citations</h2>
+                <div class="flex gap-2 items-center" id="lib-actions"></div>
+            </div>
+
+            <!-- Search + Filter Row -->
+            <div class="flex gap-2 flex-wrap">
+                <div class="flex-1 min-w-48 relative">
+                    <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke-width="2"/></svg>
+                    <input id="search-input" class="field-input w-full pl-9 py-2" placeholder="Search citations...">
+                </div>
+                <select id="filter-program" class="field-input py-2 text-xs">
+                    <option value="">All Programs</option>
+                </select>
+                <select id="filter-tag" class="field-input py-2 text-xs">
+                    <option value="">All Tags</option>
+                </select>
             </div>
         </div>
 
-        <div class="border-t pt-12">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Saved Citations</h2>
-                <div id="lib-controls" class="hidden flex gap-2">
-                    <button onclick="selectAll()" class="px-3 py-1.5 text-xs font-bold text-slate-600 uppercase border border-slate-300 rounded hover:bg-slate-50">Select All</button>
-                    <button onclick="copySelected()" class="px-3 py-1.5 text-xs font-bold text-slate-600 uppercase border border-slate-300 rounded hover:bg-slate-50">Copy Selected</button>
-                    <button onclick="removeSelected()" class="px-3 py-1.5 text-xs font-bold text-red-600 uppercase border border-red-200 rounded hover:bg-red-50 flex items-center gap-1"><i data-lucide="trash-2" class="w-3 h-3"></i>Delete</button>
-                    <button onclick="exportCSV()" class="px-3 py-1.5 text-xs font-bold text-blue-700 uppercase border border-blue-200 rounded hover:bg-blue-50 flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i>Export CSV</button>
-                </div>
-            </div>
-            <div id="citation-list" class="grid gap-3"></div>
+        <div id="citation-list" class="divide-y divide-slate-100 min-h-24"></div>
+
+        <div id="lib-footer" class="hidden px-6 py-3 bg-slate-50 border-t border-slate-100 flex gap-3 flex-wrap">
+            <button onclick="selectAll()" class="text-xs font-bold text-slate-600 uppercase hover:text-slate-900">Select All</button>
+            <button onclick="deselectAll()" class="text-xs font-bold text-slate-400 uppercase hover:text-slate-600">Deselect</button>
+            <div class="flex-1"></div>
+            <button onclick="bulkTagModal()" id="bulk-tag-btn" class="hidden px-3 py-1.5 text-xs font-bold text-amber-700 uppercase border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors">Tag Selected</button>
+            <button onclick="copySelected()" id="copy-sel-btn" class="hidden px-3 py-1.5 text-xs font-bold text-slate-600 uppercase border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">Copy Selected</button>
+            <button onclick="removeSelected()" id="del-sel-btn" class="hidden px-3 py-1.5 text-xs font-bold text-red-600 uppercase border border-red-100 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete
+            </button>
+            <button onclick="exportCSV()" class="px-3 py-1.5 text-xs font-bold text-blue-700 uppercase border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Export CSV
+            </button>
         </div>
-    </main>
+    </div>
+</div>
 
-    <div id="toast" class="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-xs shadow-xl opacity-0 toast"></div>
+<!-- Bulk Tag Modal -->
+<div id="tag-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <h3 class="font-black text-slate-900 mb-1">Tag Selected Citations</h3>
+        <p class="text-xs text-slate-500 mb-4">Add a tag to all selected citations at once.</p>
+        <input id="bulk-tag-input" class="field-input w-full mb-4" placeholder="Enter tag..." maxlength="30">
+        <div class="flex gap-3">
+            <button onclick="closeBulkTagModal()" class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs uppercase hover:bg-slate-200">Cancel</button>
+            <button onclick="applyBulkTag()" class="flex-1 px-4 py-2.5 bg-amber-400 text-slate-900 rounded-xl font-black text-xs uppercase hover:bg-amber-300">Apply Tag</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // --- Registry ---
-        const PROGRAM_KEYS = [
-            { program: 'SPIRE Up', unit: 'Skill', lesson: 'Lesson', task: 'Activity' },
-            { program: 'SPIRE 4E', unit: 'Level', lesson: 'Lesson', task: 'Step' },
-            { program: 'SPIRE Foundations: Sounds Sensible', unit: 'Lesson', task: 'Step' },
-            { program: 'Megawords', unit: 'Book', lesson: 'Word List', task: 'Exercise' },
-            { program: 'Reading Accelerator', unit: 'Skill', lesson: 'Lesson', task: 'Activity' },
-            { program: 'SPIRE Next', unit: 'Level', lesson: 'Lesson', task: 'Read' },
-            { program: 'Wordly Wise', unit: 'Book', lesson: 'Lesson', task: 'Activity' },
-            { program: 'SPIRE Decodable Readers', unit: 'Level', lesson: 'Set', task: 'Reader' },
-            { program: 'Readfetti', unit: 'Skill Group', lesson: 'Book', task: 'Focus' },
-            { program: 'Vocabulary from Classical Roots', unit: 'Book', lesson: 'Lesson', task: 'Activity/Exercise' }
-        ];
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 hidden z-50">
+    <div class="bg-slate-900 text-white px-5 py-3 rounded-full font-bold text-xs shadow-xl flex items-center gap-2 toast-enter">
+        <svg id="toast-icon" class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span id="toast-msg"></span>
+    </div>
+</div>
 
-        const MATERIALS = [
-            { key: 'TE', name: 'Teacher Edition / Guide' }, { key: 'SE', name: 'Student Edition / Book' },
-            { key: 'SWB', name: 'Student Workbook' }, { key: 'BLM', name: 'Blackline Master' },
-            { key: 'TR', name: 'Teacher Resource' }, { key: 'SR', name: 'Student Resource' },
-            { key: 'DR', name: 'Decodable Reader' }, { key: 'RAC', name: 'Read-Aloud Cards' },
-            { key: 'WL', name: 'Word List' }, { key: 'EX', name: 'Exercise / Practice Sheet(s)' },
-            { key: 'GC', name: 'Game Cards' }, { key: 'LC', name: 'Letter Cards' },
-            { key: 'WC', name: 'Word Cards' }, { key: 'HWC', name: 'High-Frequency / Heart Word Cards' },
-            { key: 'PFC', name: 'Phonogram Flash Cards' }, { key: 'KWS', name: 'Key Word / Concept Sheet' },
-            { key: 'MC', name: 'Manipulative Cards / Tiles' }, { key: 'SMK', name: 'Student Manipulatives Kit' },
-            { key: 'PT', name: 'Placement Test' }, { key: 'ASMT', name: 'Assessment' },
-            { key: 'FP', name: 'Fluency Practice / Drill Sheet(s)' }, { key: 'RP', name: 'Reading Passage(s)' },
-            { key: 'UR', name: 'Unit Resource' }, { key: 'DTE', name: 'Digital Teacher Edition' },
-            { key: 'DSE', name: 'Digital Student Edition' }, { key: 'DSWB', name: 'Digital Student Workbook' },
-            { key: 'DTR', name: 'Digital Teacher Resource' }, { key: 'DSR', name: 'Digital Student Resource' },
-            { key: 'DA', name: 'Digital Activity' }, { key: 'DASMT', name: 'Digital Assessment' },
-            { key: 'DASH', name: 'Dashboard / Analytics' }, { key: 'DG', name: 'Digital Game / Interactive Tool' },
-            { key: 'DMR', name: 'Digital Manipulative Resource' }, { key: 'DFP', name: 'Digital Fluency Practice' }
-        ];
+<style>
+    .field-label { display: block; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+    .field-input { padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; font-size: 13px; color: #0f172a; width: 100%; transition: border-color 0.15s; }
+    .tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+    .tag-chip-amber { background: #fef3c7; color: #92400e; }
+    .tag-chip-blue { background: #dbeafe; color: #1e3a8a; }
+    .tag-chip-remove { cursor: pointer; opacity: 0.6; font-size: 12px; line-height: 1; }
+    .tag-chip-remove:hover { opacity: 1; }
+</style>
 
-        // --- State ---
-        let citations = JSON.parse(localStorage.getItem('eps_citations') || '[]');
-        let selectedIds = new Set();
+<script>
+// ── Registry ──────────────────────────────────────────────────────────────
+const PROGRAMS = [
+    { program: 'SPIRE Up', unit: 'Skill', lesson: 'Lesson', task: 'Activity' },
+    { program: 'SPIRE 4E', unit: 'Level', lesson: 'Lesson', task: 'Step' },
+    { program: 'SPIRE Foundations: Sounds Sensible', unit: 'Lesson', task: 'Step' },
+    { program: 'Megawords', unit: 'Book', lesson: 'Word List', task: 'Exercise' },
+    { program: 'Reading Accelerator', unit: 'Skill', lesson: 'Lesson', task: 'Activity' },
+    { program: 'SPIRE Next', unit: 'Level', lesson: 'Lesson', task: 'Read' },
+    { program: 'Wordly Wise', unit: 'Book', lesson: 'Lesson', task: 'Activity' },
+    { program: 'SPIRE Decodable Readers', unit: 'Level', lesson: 'Set', task: 'Reader' },
+    { program: 'Readfetti', unit: 'Skill Group', lesson: 'Book', task: 'Focus' },
+    { program: 'Vocabulary from Classical Roots', unit: 'Book', lesson: 'Lesson', task: 'Activity/Exercise' }
+];
 
-        // --- Init ---
-        const programInput = document.getElementById('program');
-        const materialInput = document.getElementById('material');
-        const pList = document.getElementById('program-list');
-        const mList = document.getElementById('material-list');
-        
-        PROGRAM_KEYS.forEach(p => pList.innerHTML += `<option value="${p.program}">`);
-        MATERIALS.forEach(m => mList.innerHTML += `<option value="${m.name}">${m.key} - ${m.name}</option>`);
+const MATERIALS = [
+    { key: 'TE', name: 'Teacher Edition / Guide' }, { key: 'SE', name: 'Student Edition / Book' },
+    { key: 'SWB', name: 'Student Workbook' }, { key: 'BLM', name: 'Blackline Master' },
+    { key: 'TR', name: 'Teacher Resource' }, { key: 'SR', name: 'Student Resource' },
+    { key: 'DR', name: 'Decodable Reader' }, { key: 'RAC', name: 'Read-Aloud Cards' },
+    { key: 'WL', name: 'Word List' }, { key: 'EX', name: 'Exercise / Practice Sheet(s)' },
+    { key: 'GC', name: 'Game Cards' }, { key: 'LC', name: 'Letter Cards' },
+    { key: 'WC', name: 'Word Cards' }, { key: 'HWC', name: 'High-Frequency / Heart Word Cards' },
+    { key: 'PFC', name: 'Phonogram Flash Cards' }, { key: 'KWS', name: 'Key Word / Concept Sheet' },
+    { key: 'MC', name: 'Manipulative Cards / Tiles' }, { key: 'SMK', name: 'Student Manipulatives Kit' },
+    { key: 'PT', name: 'Placement Test' }, { key: 'ASMT', name: 'Assessment' },
+    { key: 'FP', name: 'Fluency Practice / Drill Sheet(s)' }, { key: 'RP', name: 'Reading Passage(s)' },
+    { key: 'UR', name: 'Unit Resource' }, { key: 'DTE', name: 'Digital Teacher Edition' },
+    { key: 'DSE', name: 'Digital Student Edition' }, { key: 'DSWB', name: 'Digital Student Workbook' },
+    { key: 'DTR', name: 'Digital Teacher Resource' }, { key: 'DSR', name: 'Digital Student Resource' },
+    { key: 'DA', name: 'Digital Activity' }, { key: 'DASMT', name: 'Digital Assessment' },
+    { key: 'DASH', name: 'Dashboard / Analytics' }, { key: 'DG', name: 'Digital Game / Interactive Tool' },
+    { key: 'DMR', name: 'Digital Manipulative Resource' }, { key: 'DFP', name: 'Digital Fluency Practice' }
+];
 
-        // --- Logic ---
-        function updatePreview() {
-            const prog = PROGRAM_KEYS.find(p => p.program === programInput.value) || {};
-            const dyn = document.getElementById('dynamic-fields');
-            const currentHTML = dyn.innerHTML;
-            
-            // Only re-render if program changes structure
-            if (prog.unit || prog.lesson || prog.task) {
-                let html = '';
-                ['unit', 'lesson', 'task'].forEach(k => {
-                    if (prog[k]) {
-                        html += `<div class="flex flex-col gap-1.5 w-full"><label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">${prog[k]}</label><input id="${k}" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="${prog[k]}..."></div>`;
-                    }
-                });
-                if(dyn.innerHTML !== html) dyn.innerHTML = html;
+// ── State ─────────────────────────────────────────────────────────────────
+let citations = [];
+let formTags = [];
+let selectedIds = new Set();
+let storageReady = false;
+const STORAGE_KEY = 'eps_citations_v2';
+
+// ── Storage (persistent via window.storage API, fallback to localStorage) ─
+async function loadFromStorage() {
+    try {
+        const result = await window.storage.get(STORAGE_KEY);
+        if (result && result.value) {
+            citations = JSON.parse(result.value);
+            document.getElementById('storage-status').textContent = `Persistent storage active — ${citations.length} citation${citations.length !== 1 ? 's' : ''} synced`;
+            storageReady = true;
+        } else {
+            // Try migrating from old localStorage
+            const legacy = localStorage.getItem('eps_citations');
+            if (legacy) {
+                citations = JSON.parse(legacy).map(c => ({ ...c, tags: c.tags || [] }));
+                await saveToStorage();
+                localStorage.removeItem('eps_citations');
+                document.getElementById('storage-status').textContent = `Migrated ${citations.length} citation${citations.length !== 1 ? 's' : ''} to persistent storage`;
             } else {
-                dyn.innerHTML = '';
+                document.getElementById('storage-status').textContent = 'Persistent storage active — ready';
             }
-
-            // Calculate String
-            const materialVal = materialInput.value;
-            const isAbbr = document.getElementById('abbr-check').checked;
-            const matItem = MATERIALS.find(m => m.key === materialVal || m.name === materialVal);
-            const matDisplay = matItem ? (isAbbr ? matItem.key : matItem.name) : materialVal;
-
-            const parts = [
-                document.getElementById('standards').value,
-                programInput.value,
-                matDisplay,
-                document.getElementById('unit')?.value ? `${prog.unit}: ${document.getElementById('unit').value}` : null,
-                document.getElementById('lesson')?.value ? `${prog.lesson}: ${document.getElementById('lesson').value}` : null,
-                document.getElementById('task')?.value ? `${prog.task}: ${document.getElementById('task').value}` : null,
-                document.getElementById('page').value ? (/[\-,\s]/.test(document.getElementById('page').value.trim()) ? `pp. ${document.getElementById('page').value.trim()}` : `p. ${document.getElementById('page').value.trim()}`) : null,
-                document.getElementById('format').value,
-                document.getElementById('delivery').value,
-                document.getElementById('audience').value,
-                document.getElementById('evidence').value,
-                document.getElementById('directions').value
-            ].filter(Boolean);
-
-            const url = document.getElementById('url').value;
-            const final = parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
-            document.getElementById('preview-text').innerText = final || "Citation will appear here...";
+            storageReady = true;
         }
+    } catch(e) {
+        // Fallback to localStorage
+        try {
+            const local = localStorage.getItem('eps_citations') || localStorage.getItem('eps_citations_v2');
+            citations = local ? JSON.parse(local).map(c => ({ ...c, tags: c.tags || [] })) : [];
+        } catch(e2) { citations = []; }
+        document.getElementById('storage-banner').style.background = '#64748b';
+        document.getElementById('storage-status').textContent = 'Local storage only — citations saved to this browser';
+        storageReady = true;
+    }
+    renderAll();
+}
 
-        function handleSave() {
-            const text = document.getElementById('preview-text').innerText;
-            if(!text || text.includes('appear here')) return;
-            const newCitation = { id: Date.now().toString(), text, program: programInput.value || 'Manual' };
-            citations = [newCitation, ...citations];
-            localStorage.setItem('eps_citations', JSON.stringify(citations));
-            showToast('Citation Saved');
-            renderLibrary();
+async function saveToStorage() {
+    try {
+        await window.storage.set(STORAGE_KEY, JSON.stringify(citations));
+    } catch(e) {
+        try { localStorage.setItem('eps_citations_v2', JSON.stringify(citations)); } catch(e2) {}
+    }
+}
+
+// ── Init Datalists ────────────────────────────────────────────────────────
+PROGRAMS.forEach(p => document.getElementById('program-list').innerHTML += `<option value="${p.program}">`);
+MATERIALS.forEach(m => document.getElementById('material-list').innerHTML += `<option value="${m.name}">`);
+
+// ── Citation Builder ───────────────────────────────────────────────────────
+function getProgramMeta() {
+    return PROGRAMS.find(p => p.program === document.getElementById('program').value) || {};
+}
+
+function getMaterialDisplay() {
+    const val = document.getElementById('material').value;
+    const isAbbr = document.getElementById('abbr-check').checked;
+    const item = MATERIALS.find(m => m.key === val || m.name === val);
+    if (!item) return val;
+    return isAbbr ? item.key : item.name;
+}
+
+function formatPage(val) {
+    if (!val) return null;
+    return /[\-,\s]/.test(val.trim()) ? `pp. ${val.trim()}` : `p. ${val.trim()}`;
+}
+
+function buildCitationText() {
+    const prog = getProgramMeta();
+    const parts = [
+        document.getElementById('standards').value,
+        document.getElementById('program').value,
+        getMaterialDisplay(),
+        document.getElementById('unit')?.value ? `${prog.unit}: ${document.getElementById('unit').value}` : null,
+        document.getElementById('lesson')?.value ? `${prog.lesson}: ${document.getElementById('lesson').value}` : null,
+        document.getElementById('task')?.value ? `${prog.task}: ${document.getElementById('task').value}` : null,
+        formatPage(document.getElementById('page').value),
+        document.getElementById('format').value,
+        document.getElementById('delivery').value,
+        document.getElementById('audience').value,
+        document.getElementById('evidence').value,
+        document.getElementById('directions').value
+    ].filter(Boolean);
+    const url = document.getElementById('url').value;
+    return parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
+}
+
+function updateDynamicFields() {
+    const prog = getProgramMeta();
+    const dyn = document.getElementById('dynamic-fields');
+    let html = '';
+    ['unit', 'lesson', 'task'].forEach(k => {
+        if (prog[k]) {
+            html += `<div class="flex flex-col gap-1 w-full"><label class="field-label">${prog[k]}</label><input id="${k}" class="field-input" placeholder="${prog[k]}..."></div>`;
         }
+    });
+    dyn.innerHTML = html;
+}
 
-        function handleCopy() {
-            const text = document.getElementById('preview-text').innerText;
-            navigator.clipboard.writeText(text);
-            showToast('Copied to clipboard');
-        }
+function updatePreview() {
+    updateDynamicFields();
+    const text = buildCitationText();
+    const el = document.getElementById('preview-text');
+    el.textContent = text || 'Citation will appear here as you fill in fields above...';
+    el.style.opacity = text ? '1' : '0.5';
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.opacity = 1;
-            setTimeout(() => t.style.opacity = 0, 2000);
-        }
+    // Char count
+    const dir = document.getElementById('directions').value.length;
+    const cc = document.getElementById('char-count');
+    cc.textContent = `${dir} / 300`;
+    cc.classList.toggle('char-warning', dir > 250);
+}
 
-        function renderLibrary() {
-            const listEl = document.getElementById('citation-list');
-            const controls = document.getElementById('lib-controls');
-            controls.className = citations.length > 0 ? 'flex gap-2' : 'hidden';
-            listEl.innerHTML = citations.map(c => `
-                <div class="bg-white p-4 rounded-lg border border-slate-200 flex gap-4 items-start shadow-sm">
-                    <input type="checkbox" class="mt-1" onchange="toggleSelect('${c.id}')" ${selectedIds.has(c.id) ? 'checked' : ''}>
-                    <p class="text-xs text-slate-700 leading-relaxed font-medium">${c.text}</p>
+// ── Form Tags ─────────────────────────────────────────────────────────────
+function addFormTag() {
+    const input = document.getElementById('tag-input');
+    const val = input.value.trim();
+    if (!val || formTags.includes(val)) { input.value = ''; return; }
+    formTags.push(val);
+    input.value = '';
+    renderFormTags();
+    updatePreview();
+}
+
+function removeFormTag(tag) {
+    formTags = formTags.filter(t => t !== tag);
+    renderFormTags();
+    updatePreview();
+}
+
+function renderFormTags() {
+    document.getElementById('form-tags').innerHTML = formTags.map(t =>
+        `<span class="tag-chip tag-chip-amber">${t}<span class="tag-chip-remove" onclick="removeFormTag('${t.replace(/'/g,"\\'")}')">×</span></span>`
+    ).join('');
+}
+
+// Enter key adds tag
+document.getElementById('tag-input').addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); addFormTag(); }});
+
+// ── Save / Copy ────────────────────────────────────────────────────────────
+function handleSave() {
+    const text = buildCitationText();
+    if (!text.trim()) return;
+    const c = {
+        id: Date.now().toString(),
+        text,
+        program: document.getElementById('program').value || 'Manual',
+        tags: [...formTags],
+        createdAt: Date.now()
+    };
+    citations = [c, ...citations];
+    saveToStorage();
+    showToast('Citation saved');
+    renderAll();
+}
+
+function handleCopy() {
+    const text = buildCitationText();
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+function clearForm() {
+    ['program','standards','material','page','format','delivery','audience','evidence','url','directions'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+    });
+    document.getElementById('abbr-check').checked = false;
+    document.getElementById('dynamic-fields').innerHTML = '';
+    formTags = [];
+    renderFormTags();
+    updatePreview();
+}
+
+// ── Library Render ─────────────────────────────────────────────────────────
+function getFilteredCitations() {
+    const search = document.getElementById('search-input')?.value.toLowerCase() || '';
+    const prog = document.getElementById('filter-program')?.value || '';
+    const tag = document.getElementById('filter-tag')?.value || '';
+    return citations.filter(c => {
+        if (prog && c.program !== prog) return false;
+        if (tag && !(c.tags || []).includes(tag)) return false;
+        if (search && !c.text.toLowerCase().includes(search) && !(c.tags||[]).join(' ').toLowerCase().includes(search)) return false;
+        return true;
+    });
+}
+
+function renderAll() {
+    renderFilters();
+    renderLibrary();
+    updateCitationCounter();
+}
+
+function updateCitationCounter() {
+    document.getElementById('citation-counter').textContent = citations.length;
+}
+
+function renderFilters() {
+    const programs = [...new Set(citations.map(c => c.program))].sort();
+    const tags = [...new Set(citations.flatMap(c => c.tags || []))].sort();
+
+    const fp = document.getElementById('filter-program');
+    const ft = document.getElementById('filter-tag');
+    const curProg = fp.value, curTag = ft.value;
+
+    fp.innerHTML = '<option value="">All Programs</option>' + programs.map(p => `<option value="${p}"${p===curProg?' selected':''}>${p}</option>`).join('');
+    ft.innerHTML = '<option value="">All Tags</option>' + tags.map(t => `<option value="${t}"${t===curTag?' selected':''}>${t}</option>`).join('');
+}
+
+function renderLibrary() {
+    const list = document.getElementById('citation-list');
+    const filtered = getFilteredCitations();
+    const footer = document.getElementById('lib-footer');
+
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="px-6 py-12 text-center text-slate-400 text-sm">${citations.length === 0 ? 'No citations saved yet. Build your first one above.' : 'No citations match your current filters.'}</div>`;
+        footer.classList.add('hidden');
+        return;
+    }
+
+    footer.classList.remove('hidden');
+
+    list.innerHTML = filtered.map(c => `
+        <div class="citation-card px-6 py-4 flex gap-4 items-start group" data-id="${c.id}">
+            <input type="checkbox" class="mt-0.5 w-4 h-4 rounded flex-shrink-0" ${selectedIds.has(c.id)?'checked':''} onchange="toggleSelect('${c.id}')">
+            <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap gap-1 mb-2">
+                    <span class="tag-chip tag-chip-blue">${c.program}</span>
+                    ${(c.tags||[]).map(t => `<span class="tag-chip tag-chip-amber">${t}<span class="tag-chip-remove" onclick="removeTagFromCitation('${c.id}','${t.replace(/'/g,"\\'")}')">×</span></span>`).join('')}
+                    <button onclick="addTagToCitation('${c.id}')" class="tag-chip bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors px-2">+ tag</button>
                 </div>
-            `).join('');
-            lucide.createIcons();
-        }
+                <p class="text-xs text-slate-700 leading-relaxed">${c.text}</p>
+                <p class="text-[10px] text-slate-400 mt-1.5">${new Date(c.createdAt).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})}</p>
+            </div>
+            <button onclick="copyCitation('${c.id}')" class="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1.5 rounded-lg hover:bg-slate-100" title="Copy">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+            </button>
+        </div>
+    `).join('');
 
-        function toggleSelect(id) {
-            if(selectedIds.has(id)) selectedIds.delete(id);
-            else selectedIds.add(id);
-            renderLibrary();
-        }
+    // Selection buttons
+    const hasSel = selectedIds.size > 0;
+    document.getElementById('bulk-tag-btn').classList.toggle('hidden', !hasSel);
+    document.getElementById('copy-sel-btn').classList.toggle('hidden', !hasSel);
+    document.getElementById('del-sel-btn').classList.toggle('hidden', !hasSel);
+}
 
-        function selectAll() {
-            citations.forEach(c => selectedIds.add(c.id));
-            renderLibrary();
-        }
+// ── Citation Tag Actions ──────────────────────────────────────────────────
+function addTagToCitation(id) {
+    const tag = prompt('Enter tag:');
+    if (!tag || !tag.trim()) return;
+    citations = citations.map(c => c.id === id ? { ...c, tags: [...new Set([...(c.tags||[]), tag.trim()])] } : c);
+    saveToStorage();
+    renderAll();
+}
 
-        function copySelected() {
-            const text = citations.filter(c => selectedIds.has(c.id)).map(c => c.text).join('\n\n');
-            navigator.clipboard.writeText(text);
-            showToast('Copied selected');
-        }
+function removeTagFromCitation(id, tag) {
+    citations = citations.map(c => c.id === id ? { ...c, tags: (c.tags||[]).filter(t => t !== tag) } : c);
+    saveToStorage();
+    renderAll();
+}
 
-        function removeSelected() {
-            citations = citations.filter(c => !selectedIds.has(c.id));
-            selectedIds.clear();
-            localStorage.setItem('eps_citations', JSON.stringify(citations));
-            renderLibrary();
-        }
+function copyCitation(id) {
+    const c = citations.find(x => x.id === id);
+    if (!c) return;
+    navigator.clipboard.writeText(c.text).then(() => showToast('Citation copied'));
+}
 
-        function exportCSV() {
-            const csv = "Program,Citation\n" + citations.map(c => `"${c.program}","${c.text.replace(/"/g, '""')}"`).join("\n");
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url; link.download = "citations.csv"; link.click();
-        }
+// ── Selection Actions ─────────────────────────────────────────────────────
+function toggleSelect(id) {
+    selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
+    renderLibrary();
+}
 
-        // Listen for all inputs to update preview
-        document.addEventListener('input', (e) => {
-            if (['program', 'standards', 'material', 'abbr-check', 'page', 'format', 'delivery', 'audience', 'evidence', 'url', 'directions'].includes(e.target.id) || e.target.id === 'unit' || e.target.id === 'lesson' || e.target.id === 'task') {
-                updatePreview();
-            }
-        });
+function selectAll() {
+    getFilteredCitations().forEach(c => selectedIds.add(c.id));
+    renderLibrary();
+}
 
-        // Initialize
-        renderLibrary();
-        lucide.createIcons();
-    </script>
+function deselectAll() {
+    selectedIds.clear();
+    renderLibrary();
+}
+
+function copySelected() {
+    const text = citations.filter(c => selectedIds.has(c.id)).map(c => c.text).join('\n\n');
+    navigator.clipboard.writeText(text).then(() => showToast(`Copied ${selectedIds.size} citation${selectedIds.size !== 1 ? 's' : ''}`));
+}
+
+function removeSelected() {
+    if (!confirm(`Delete ${selectedIds.size} citation${selectedIds.size !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+    citations = citations.filter(c => !selectedIds.has(c.id));
+    selectedIds.clear();
+    saveToStorage();
+    renderAll();
+    showToast('Citations deleted');
+}
+
+// ── Bulk Tag Modal ────────────────────────────────────────────────────────
+function bulkTagModal() {
+    document.getElementById('tag-modal').classList.remove('hidden');
+    document.getElementById('bulk-tag-input').value = '';
+    document.getElementById('bulk-tag-input').focus();
+}
+
+function closeBulkTagModal() {
+    document.getElementById('tag-modal').classList.add('hidden');
+}
+
+function applyBulkTag() {
+    const tag = document.getElementById('bulk-tag-input').value.trim();
+    if (!tag) return;
+    citations = citations.map(c => selectedIds.has(c.id) ? { ...c, tags: [...new Set([...(c.tags||[]), tag])] } : c);
+    saveToStorage();
+    closeBulkTagModal();
+    renderAll();
+    showToast(`Tagged ${selectedIds.size} citation${selectedIds.size !== 1 ? 's' : ''} with "${tag}"`);
+}
+
+document.getElementById('bulk-tag-input').addEventListener('keydown', e => { if(e.key === 'Enter') applyBulkTag(); });
+document.getElementById('tag-modal').addEventListener('click', e => { if(e.target === document.getElementById('tag-modal')) closeBulkTagModal(); });
+
+// ── Export ────────────────────────────────────────────────────────────────
+function exportCSV() {
+    const rows = [['Program', 'Tags', 'Citation', 'Date']];
+    citations.forEach(c => rows.push([
+        `"${c.program}"`,
+        `"${(c.tags||[]).join('; ')}"`,
+        `"${c.text.replace(/"/g,'""')}"`,
+        `"${new Date(c.createdAt).toLocaleDateString()}"`
+    ]));
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = `eps-citations-${new Date().toISOString().slice(0,10)}.csv`; link.click();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+    clearTimeout(toastTimer);
+    document.getElementById('toast-msg').textContent = msg;
+    const toast = document.getElementById('toast');
+    toast.classList.remove('hidden');
+    toastTimer = setTimeout(() => toast.classList.add('hidden'), 2500);
+}
+
+// ── Event Listeners ────────────────────────────────────────────────────────
+document.addEventListener('input', e => {
+    const watched = ['program','standards','material','abbr-check','page','format','delivery','audience','evidence','url','directions','unit','lesson','task'];
+    if (watched.includes(e.target.id)) updatePreview();
+    if (['search-input','filter-program','filter-tag'].includes(e.target.id)) renderLibrary();
+    if (['filter-program','filter-tag'].includes(e.target.id)) renderLibrary();
+});
+
+document.addEventListener('change', e => {
+    if (['filter-program','filter-tag'].includes(e.target.id)) renderLibrary();
+    if (e.target.id === 'abbr-check') updatePreview();
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+loadFromStorage();
+</script>
 </body>
 </html>
