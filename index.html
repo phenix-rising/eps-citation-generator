@@ -408,6 +408,37 @@
             font-size: 10px; font-weight: 800; color: #94a3b8;
             letter-spacing: 0.05em; flex-shrink: 0;
         }
+
+        /* ── Required field indicator ── */
+        .req { color: #dc2626; font-size: 11px; margin-left: 1px; line-height: 1; }
+        .field-required input, .field-required .combo input { border-color: #fca5a5 !important; }
+        .field-required input:focus, .field-required .combo input:focus { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220,38,38,0.1) !important; }
+        /* ── Edit mode banner ── */
+        .edit-banner {
+            display: none; background: #fef3c7; border: 1.5px solid #fbbf24;
+            border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;
+            font-size: 12px; font-weight: 700; color: #92400e;
+            align-items: center; gap: 10px; flex-wrap: wrap;
+        }
+        .edit-banner.active { display: flex; }
+        .edit-banner-cancel { margin-left: auto; font-size: 10px; font-weight: 800; color: #92400e; background: none; border: 1.5px solid #f59e0b; border-radius: 6px; padding: 3px 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; }
+        .edit-banner-cancel:hover { background: #fbbf24; }
+        /* ── Stat pills on filter row ── */
+        .filter-stat { font-size: 10px; font-weight: 800; color: #64748b; background: #f1f5f9; border-radius: 6px; padding: 3px 8px; white-space: nowrap; align-self: center; }
+        /* ── Import CSV ── */
+        .import-label { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; background: #f1f5f9; color: #475569; cursor: pointer; border: 1.5px solid #e2e8f0; transition: background 0.15s; white-space: nowrap; }
+        .import-label:hover { background: #e2e8f0; }
+        #import-csv-input { display: none; }
+        /* ── Citation card action buttons ── */
+        .card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .card-actions button { opacity: 0; background: none; border: none; cursor: pointer; padding: 5px; border-radius: 7px; color: #94a3b8; transition: opacity 0.15s, background 0.15s; }
+        .citation-card:hover .card-actions button { opacity: 1; }
+        .card-actions button:hover { background: #f1f5f9; color: #475569; }
+        .card-actions .edit-btn:hover { color: #1e3a8a; background: #dbeafe; }
+        /* ── GitHub sync status dot ── */
+        .gh-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; margin-right: 4px; vertical-align: middle; }
+        .gh-dot.ok { background: #22c55e; }
+        .gh-dot.err { background: #ef4444; }
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -419,6 +450,7 @@
 <div id="storage-banner" class="banner">
     <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2.5"/><path stroke-width="2" d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.3-6.7-2.1 2.1M8.4 15.6l-2.1 2.1m0-11.4 2.1 2.1m7.2 7.2 2.1 2.1"/></svg>
     <span id="storage-status">Connecting to persistent storage...</span>
+    <span class="gh-dot" title="GitHub log status" style="margin-left:8px"></span>
 </div>
 <div class="page">
     <!-- Header -->
@@ -448,10 +480,16 @@
             <button class="btn-link" onclick="clearForm()">Clear Form</button>
         </div>
         <div class="card-body">
+            <!-- Edit mode banner -->
+            <div class="edit-banner" id="edit-banner">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                <span id="edit-banner-msg">Editing citation</span>
+                <button class="edit-banner-cancel" onclick="cancelEdit()">Cancel Edit</button>
+            </div>
             <div class="form-grid">
                 <!-- Program -->
                 <div class="field col-span-2">
-                    <label class="label">EPS Program Name</label>
+                    <label class="label">EPS Program Name <span class="req">*</span></label>
                     <div class="combo" id="program-combo">
                         <input id="program" autocomplete="off" placeholder="Start typing or select a program...">
                         <div class="combo-menu" id="program-menu"></div>
@@ -465,7 +503,7 @@
                 <!-- Material Type -->
                 <div class="field">
                     <div class="label-row">
-                        <label class="label" for="material">Material Type</label>
+                        <label class="label" for="material">Material Type <span class="req">*</span></label>
                         <label class="abbr-row">
                             <input type="checkbox" id="abbr-check"> Abbreviate
                         </label>
@@ -479,7 +517,7 @@
                 <div id="dynamic-fields" style="display:contents"></div>
                 <!-- Page Numbers -->
                 <div class="field">
-                    <label class="label">Page Number(s)</label>
+                    <label class="label" id="page-label">Page Number(s) <span class="req">*</span></label>
                     <input id="page" placeholder="e.g., 42 or 64–68">
                 </div>
                 <!-- Format -->
@@ -517,7 +555,7 @@
                 </div>
                 <!-- URL -->
                 <div class="field col-span-2">
-                    <label class="label">Evidence Web Link <span class="label-note">(optional)</span></label>
+                    <label class="label">Evidence Web Link <span class="req">*</span></label>
                     <input id="url" placeholder="https://...">
                 </div>
                 <!-- Directions -->
@@ -550,11 +588,11 @@
                     <button class="btn btn-amber btn-sm" onclick="addFormTag()">+ Add Tag</button>
                 </div>
             </div>
-            <!-- Save — final step, below the tags -->
+            <!-- Save / Update — final step, below the tags -->
             <div class="btn-row">
-                <button class="btn btn-primary" style="flex:1" onclick="handleSave()">
+                <button class="btn btn-primary" style="flex:1" id="save-btn" onclick="handleSave()">
                     <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Save Citation
+                    <span id="save-btn-label">Save Citation</span>
                 </button>
             </div>
         </div><!-- /card-body -->
@@ -572,6 +610,11 @@
                         Export CSV
                     </button>
                     <button class="btn btn-ghost btn-sm" onclick="loadExamples()">+ Load Examples</button>
+                    <label class="import-label" title="Import citations from a previously exported CSV">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Import CSV
+                        <input type="file" id="import-csv-input" accept=".csv" onchange="importCSV(event)">
+                    </label>
                 </div>
             </div>
             <!-- Selection actions — appear when one or more citations are checked -->
@@ -583,7 +626,9 @@
                     Delete
                 </button>
             </div>
-            <div class="filter-row">
+            <div class="filter-row" id="filter-row">
+                <span class="filter-stat" id="stat-programs" title="Unique programs cited"></span>
+                <span class="filter-stat" id="stat-standards" title="Unique standards cited"></span>
                 <div class="search-wrap">
                     <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke-width="2"/></svg>
                     <input id="search-input" placeholder="Search citations...">
@@ -833,6 +878,7 @@ let citations = [];
 let formTags  = [];
 let selectedIds = new Set();
 let renderedFieldSig = null;   // Signature of the currently-rendered dynamic fields
+let editingId = null;              // ID of citation currently being edited (null = new)
 const STORAGE_KEY = 'eps_citations_v2';
 
 // ── Storage ────────────────────────────────────────────────────────────────
@@ -930,11 +976,11 @@ setupCombo('material', 'material-menu', MATERIALS.map(m => ({ value: m.name, lab
 // Renames the Page Number(s) label to "Click Path" when Digital is selected.
 function updatePageLabel() {
     const format = document.getElementById('format').value;
-    const pageLabel = Array.from(document.querySelectorAll('.label')).find(l =>
-        l.nextElementSibling?.id === 'page' || l.htmlFor === 'page'
-    );
+    const pageLabel = document.getElementById('page-label');
     if (pageLabel) {
-        pageLabel.childNodes[0].textContent = format === 'Digital' ? 'Click Path' : 'Page Number(s)';
+        pageLabel.innerHTML = format === 'Digital'
+            ? 'Click Path <span class="req">*</span>'
+            : 'Page Number(s) <span class="req">*</span>';
     }
     const pageInput = document.getElementById('page');
     if (pageInput) {
@@ -1081,23 +1127,62 @@ function renderFormTags() {
 document.getElementById('tag-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addFormTag(); } });
 
 // ── Save / Copy ────────────────────────────────────────────────────────────
+function validateRequiredFields() {
+    const required = [
+        { id: 'program',  wrap: document.getElementById('program-combo')?.closest('.field') },
+        { id: 'material', wrap: document.getElementById('material-combo')?.closest('.field') },
+        { id: 'page',     wrap: document.getElementById('page')?.closest('.field') },
+        { id: 'url',      wrap: document.getElementById('url')?.closest('.field') },
+    ];
+    // Dynamic required fields: unit, lesson (if currently rendered)
+    ['unit','lesson'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el) required.push({ id: k, wrap: el.closest('.field') });
+    });
+    let valid = true;
+    required.forEach(({ id, wrap }) => {
+        const el = document.getElementById(id);
+        const empty = !el || !el.value.trim();
+        if (wrap) wrap.classList.toggle('field-required', empty);
+        if (empty) valid = false;
+    });
+    return valid;
+}
+
 function handleSave() {
+    if (!validateRequiredFields()) {
+        showToast('Fill in all required fields (marked ✱)');
+        return;
+    }
     const text = buildCitationText().trim();
     if (!text) return;
+
+    if (editingId) {
+        // Update existing citation in place
+        citations = citations.map(c => c.id === editingId
+            ? { ...c, text, program: document.getElementById('program').value || c.program, tags: [...formTags], updatedAt: Date.now() }
+            : c
+        );
+        saveToStorage();
+        showToast('Citation updated');
+        cancelEdit();
+        renderAll();
+        return;
+    }
+
     const entry = {
         id: Date.now().toString(),
         text,
         program: document.getElementById('program').value || 'Manual',
         tags: [...formTags],
-        isExample: false,                    // user content — never auto-cleared
+        isExample: false,
         createdAt: Date.now()
     };
-    // Clear the seeded examples the moment the user saves real content. Only
-    // example items are dropped; every user-saved citation is preserved.
     const userCitations = citations.filter(c => !isExampleCitation(c));
     const clearedExamples = citations.length - userCitations.length;
     citations = [entry, ...userCitations];
     saveToStorage();
+    logToGitHub(entry);   // fire-and-forget background log
     showToast(clearedExamples ? 'Citation saved — examples cleared' : 'Citation saved');
     renderAll();
 }
@@ -1114,10 +1199,54 @@ function clearForm() {
     });
     document.getElementById('abbr-check').checked = false;
     document.getElementById('dynamic-fields').innerHTML = '';
-    renderedFieldSig = null;   // force a clean rebuild next time
+    renderedFieldSig = null;
     formTags = [];
     renderFormTags();
+    // Clear required field highlights
+    document.querySelectorAll('.field-required').forEach(f => f.classList.remove('field-required'));
     updatePreview();
+    updatePageLabel();
+}
+
+function editCitation(id) {
+    const c = citations.find(x => x.id === id);
+    if (!c) return;
+    editingId = id;
+
+    // Scroll to builder
+    document.getElementById('tab-builder').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Show edit banner
+    const banner = document.getElementById('edit-banner');
+    banner.classList.add('active');
+    document.getElementById('edit-banner-msg').textContent = `Editing: ${c.program}`;
+    document.getElementById('save-btn-label').textContent = 'Update Citation';
+    document.getElementById('save-btn').style.background = '#b45309';
+
+    // Parse and repopulate fields from citation text
+    // We repopulate program from stored data; other fields are best-effort parsed
+    document.getElementById('program').value = c.program || '';
+    document.getElementById('program').dispatchEvent(new Event('input', { bubbles: true }));
+
+    // Repopulate tags
+    formTags = [...(c.tags || []).filter(t => t !== 'Example')];
+    renderFormTags();
+
+    // Store full text in directions as fallback, let user re-fill structural fields
+    // For a clean UX: pre-fill standards if detectable from text start
+    const stdMatch = c.text.match(/^([A-Z]{1,4}\.[KkPp0-9]+\.[0-9a-z.]+)/);
+    if (stdMatch) document.getElementById('standards').value = stdMatch[1];
+
+    updatePreview();
+    showToast('Edit mode — adjust fields and click Update Citation');
+}
+
+function cancelEdit() {
+    editingId = null;
+    document.getElementById('edit-banner').classList.remove('active');
+    document.getElementById('save-btn-label').textContent = 'Save Citation';
+    document.getElementById('save-btn').style.background = '';
+    clearForm();
 }
 
 // ── Examples ────────────────────────────────────────────────────────────────
@@ -1160,13 +1289,33 @@ function renderAll() {
 }
 
 function renderFilters() {
-    const programs = [...new Set(citations.map(c => c.program))].sort();
-    const tags     = [...new Set(citations.flatMap(c => c.tags || []))].sort();
+    const userCits  = citations.filter(c => !isExampleCitation(c));
+    const programs  = [...new Set(citations.map(c => c.program))].sort();
+    const tags      = [...new Set(citations.flatMap(c => c.tags || []))].sort();
     const fp = document.getElementById('filter-program');
     const ft = document.getElementById('filter-tag');
     const cp = fp.value, ct = ft.value;
-    fp.innerHTML = '<option value="">All Programs</option>' + programs.map(p => `<option${p===cp?' selected':''}>${escHtml(p)}</option>`).join('');
+
+    // Program counts
+    const progCounts = {};
+    citations.forEach(c => { progCounts[c.program] = (progCounts[c.program] || 0) + 1; });
+    fp.innerHTML = '<option value="">All Programs</option>' + programs.map(p =>
+        `<option value="${escHtml(p)}"${p===cp?' selected':''}>${escHtml(p)} (${progCounts[p]||0})</option>`
+    ).join('');
     ft.innerHTML = '<option value="">All Tags</option>' + tags.map(t => `<option${t===ct?' selected':''}>${escHtml(t)}</option>`).join('');
+
+    // Standards count from citations text (extract codes like RF.1.3, RI.4.1, L.5.4 etc.)
+    const stdSet = new Set();
+    userCits.forEach(c => {
+        const m = c.text.match(/^([A-Z]{1,4}\.[KkPp0-9]+\.[0-9a-z.]+)/);
+        if (m) stdSet.add(m[1]);
+    });
+
+    const sp = document.getElementById('stat-programs');
+    const ss = document.getElementById('stat-standards');
+    if (sp) sp.textContent = `${programs.length} program${programs.length !== 1 ? 's' : ''}`;
+    if (ss) ss.textContent = stdSet.size > 0 ? `${stdSet.size} standard${stdSet.size !== 1 ? 's' : ''}` : '';
+    if (ss) ss.style.display = stdSet.size > 0 ? '' : 'none';
 }
 
 function renderLibrary() {
@@ -1190,9 +1339,14 @@ function renderLibrary() {
                 <p class="citation-text">${escHtml(c.text)}</p>
                 <p class="citation-date">${new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>
             </div>
-            <button class="copy-btn" onclick="copyCitation('${c.id}')" title="Copy citation">
-                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
-            </button>
+            <div class="card-actions">
+                <button class="edit-btn" onclick="editCitation('${c.id}')" title="Edit citation">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button onclick="copyCitation('${c.id}')" title="Copy citation">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+                </button>
+            </div>
         </div>
     `).join('');
     const hasSel = selectedIds.size > 0;
@@ -1241,12 +1395,130 @@ function applyBulkTag() {
 document.getElementById('bulk-tag-input').addEventListener('keydown', e => { if(e.key==='Enter') applyBulkTag(); });
 document.getElementById('tag-modal').addEventListener('click', e => { if(e.target===document.getElementById('tag-modal')) closeBulkTagModal(); });
 
+// ── Import CSV ────────────────────────────────────────────────────────────
+function importCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) { showToast('CSV appears empty'); return; }
+        // Detect header row — skip if first cell looks like a column name
+        const start = lines[0].toLowerCase().includes('program') ? 1 : 0;
+        let added = 0, skipped = 0;
+        const existing = new Set(citations.map(c => c.text));
+        lines.slice(start).forEach(line => {
+            // Parse quoted CSV: "Program","Tags","Citation","Date"
+            const cols = [];
+            let cur = '', inQ = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') { inQ = !inQ; }
+                else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+                else { cur += ch; }
+            }
+            cols.push(cur);
+            const program  = (cols[0] || '').trim();
+            const tagsRaw  = (cols[1] || '').trim();
+            const text     = (cols[2] || cols[0] || '').trim();  // fallback: col 0 if no citation col
+            if (!text || existing.has(text)) { skipped++; return; }
+            const tags = tagsRaw ? tagsRaw.split(';').map(t => t.trim()).filter(Boolean) : [];
+            citations.push({
+                id: (Date.now() + added).toString(),
+                text, program: program || 'Imported',
+                tags, isExample: false,
+                createdAt: Date.now() + added
+            });
+            existing.add(text);
+            added++;
+        });
+        if (added === 0) { showToast(`No new citations found (${skipped} duplicate${skipped!==1?'s':''})`); }
+        else {
+            saveToStorage(); renderAll();
+            showToast(`Imported ${added} citation${added!==1?'s':''}${skipped?' ('+skipped+' skipped)':''}`);
+        }
+        event.target.value = ''; // reset file input
+    };
+    reader.readAsText(file);
+}
+
 // ── Export ────────────────────────────────────────────────────────────────
 function exportCSV() {
     const rows = [['Program','Tags','Citation','Date']];
     citations.forEach(c => rows.push([`"${c.program}"`,`"${(c.tags||[]).join('; ')}"`,`"${c.text.replace(/"/g,'""')}"`,`"${new Date(c.createdAt).toLocaleDateString()}"`]));
     const blob = new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `eps-citations-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+// ── GitHub Citation Log (via repository_dispatch — token never in source) ────
+//
+// HOW THIS WORKS:
+//   The browser calls the GitHub repository_dispatch API, which triggers a
+//   GitHub Actions workflow (.github/workflows/log-citation.yml). That workflow
+//   runs server-side and appends the citation to citations-log.json using a
+//   secret token stored only in GitHub's encrypted secret store — never here.
+//
+// TO ENABLE:
+//   1. Go to github.com/phenix-rising/eps-citation-generator/settings/secrets/actions
+//   2. Click "New repository secret"
+//   3. Name:  CITATION_LOG_TOKEN
+//      Value: your Fine-Grained PAT (Contents: read+write, on this repo only)
+//   4. Also add a second secret:
+//      Name:  DISPATCH_TOKEN
+//      Value: same PAT (repository_dispatch requires repo scope to trigger)
+//   5. Upload .github/workflows/log-citation.yml to your repo
+//   6. Set DISPATCH_ENABLED = true below — that's the only change needed here.
+//
+// DISPATCH_TOKEN NOTE:
+//   The DISPATCH_TOKEN used by the browser to trigger the workflow only needs
+//   the "public_repo" scope (or "repo" for private repos). It cannot read or
+//   write file contents — it can only fire the dispatch event. This is safe
+//   to store in the HTML for a public repo because it has no file-write access.
+//   The actual file write is done entirely by the Action using the server-side
+//   secret, which is never exposed to the browser.
+
+const GITHUB_LOG = {
+    enabled:       false,                                    // ← set to true after setup
+    dispatchToken: '',                                       // ← paste DISPATCH_TOKEN PAT here
+                                                             //   (public_repo scope only — safe for public repo)
+    repo:          'phenix-rising/eps-citation-generator',  // already correct
+    branch:        'main'
+};
+
+async function logToGitHub(entry) {
+    if (!GITHUB_LOG.enabled || !GITHUB_LOG.dispatchToken) return;
+
+    const url = `https://api.github.com/repos/${GITHUB_LOG.repo}/dispatches`;
+    const dot = document.querySelector('.gh-dot');
+
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `token ${GITHUB_LOG.dispatchToken}`,
+                'Accept':        'application/vnd.github+json',
+                'Content-Type':  'application/json'
+            },
+            body: JSON.stringify({
+                event_type:     'log_citation',
+                client_payload: {
+                    id:        entry.id,
+                    program:   entry.program,
+                    tags:      entry.tags || [],
+                    text:      entry.text,
+                    createdAt: new Date(entry.createdAt).toISOString()
+                }
+            })
+        });
+
+        // 204 No Content = dispatch accepted; Action will run asynchronously
+        if (dot) {
+            dot.className = (res.status === 204) ? 'gh-dot ok' : 'gh-dot err';
+            setTimeout(() => { if (dot) dot.className = 'gh-dot'; }, 5000);
+        }
+    } catch(e) {
+        if (dot) { dot.className = 'gh-dot err'; setTimeout(() => { if(dot) dot.className = 'gh-dot'; }, 5000); }
+    }
 }
 
 // ── Tabs & Reference Guide ──────────────────────────────────────────────────
@@ -1302,6 +1574,11 @@ function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 document.addEventListener('input', e => {
     if (['program','standards','material','page','format','delivery','audience','evidence','url','directions','unit','lesson','task'].includes(e.target.id)) updatePreview();
     if (['search-input'].includes(e.target.id)) renderLibrary();
+    // Clear required highlight as soon as user types something
+    if (e.target.value && e.target.value.trim()) {
+        const field = e.target.closest('.field');
+        if (field) field.classList.remove('field-required');
+    }
 });
 document.addEventListener('change', e => {
     if (['abbr-check','filter-program','filter-tag'].includes(e.target.id)) { updatePreview(); renderLibrary(); }
