@@ -194,10 +194,11 @@
             padding-top: 20px;
             border-top: 1px solid #f1f5f9;
         }
-        .tags-section .label { margin-bottom: 8px; }
-        .tag-input-row { display: flex; gap: 8px; margin-top: 8px; }
+        .tags-section .label { margin-bottom: 6px; }
+        .tag-input-row { display: flex; gap: 8px; margin-top: 6px; }
         .tag-input-row input { flex: 1; }
-        .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 24px; }
+        .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-chips:empty { display: none; }   /* collapse so label sits right above the field */
         .chip {
             display: inline-flex;
             align-items: center;
@@ -476,25 +477,28 @@
                 <div class="preview-label">Live Preview</div>
                 <p id="preview-text" class="preview-text empty">Citation will appear here as you fill in fields above...</p>
             </div>
-            <!-- Action Buttons -->
+            <!-- Copy (preview action) -->
             <div class="btn-row">
                 <button class="btn btn-ghost" onclick="handleCopy()">
                     <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
                     Copy
                 </button>
-                <button class="btn btn-primary" onclick="handleSave()">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Save Citation
-                </button>
             </div>
-            <!-- Tags — below actions, applied on save -->
+            <!-- Tags — applied on save -->
             <div class="tags-section">
-                <label class="label">Tags <span class="label-note">(applied when saved)</span></label>
+                <label class="label">Tags <span class="label-note">(applied when saved; optional)</span></label>
                 <div class="tag-chips" id="form-tags"></div>
                 <div class="tag-input-row">
                     <input id="tag-input" placeholder="Add a tag — e.g., Grade 3, Phonics, RFP-2024..." maxlength="30">
                     <button class="btn btn-amber btn-sm" onclick="addFormTag()">+ Add Tag</button>
                 </div>
+            </div>
+            <!-- Save — final step, below the tags -->
+            <div class="btn-row">
+                <button class="btn btn-primary" style="flex:1" onclick="handleSave()">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Save Citation
+                </button>
             </div>
         </div><!-- /card-body -->
     </div><!-- /card -->
@@ -503,6 +507,7 @@
         <div class="lib-header">
             <div class="lib-title-row">
                 <span class="card-header-title">Saved Citations</span>
+                <button class="btn btn-ghost btn-sm" onclick="loadExamples()">+ Load Examples</button>
             </div>
             <div class="filter-row">
                 <div class="search-wrap">
@@ -593,6 +598,19 @@ const MATERIALS = [
     { key: 'DMR', name: 'Digital Manipulative Resource' }, { key: 'DFP', name: 'Digital Fluency Practice' }
 ];
 
+// ── Example citations (loaded on demand via the "Load Examples" button) ─────
+// Illustrative only — page numbers, lesson titles, and activity names are samples.
+const EXAMPLE_CITATIONS = [
+    { program: 'SPIRE Up',                            text: "RF.1.3, SPIRE Up, Teacher Edition / Guide, Skill: 5, Lesson: 3, Activity: Word Building, p. 42, Print, Direct Instruction, Teacher, Activity" },
+    { program: 'SPIRE 4E',                            text: "RF.2.3, SPIRE 4E, Student Workbook, Level: 4, Lesson: 12, Step: 6, pp. 88–90, Print, Independent Practice, Student, Activity" },
+    { program: 'SPIRE Foundations: Sounds Sensible',  text: "RF.K.2, SPIRE Foundations: Sounds Sensible, Teacher Edition / Guide, Lesson: 18, Step: 4, p. 23, Print, Whole Group, Teacher, Narrative" },
+    { program: 'Megawords',                           text: "RF.4.3, Megawords, Student Edition / Book, Book: 3, Word List: 7, Exercise: 2, pp. 14–15, Print, Independent Practice, Student, Activity" },
+    { program: 'Wordly Wise',                         text: "L.5.4, Wordly Wise, Student Edition / Book, Book: 5, Lesson: 8, Activity: 4B, pp. 56–58, Digital, Independent Practice, Student, Activity" },
+    { program: 'SPIRE Decodable Readers',             text: "RF.1.4, SPIRE Decodable Readers, Decodable Reader, Level: 2, Set: A, Reader: Pip's Trip, p. 6, Print, Small Group, Student, Narrative" },
+    { program: 'Vocabulary from Classical Roots',     text: "L.7.4b, Vocabulary from Classical Roots, Student Edition / Book, Book: B, Lesson: 5, Activity/Exercise: C, pp. 33–34, Print, Whole Group, Student, Activity" },
+    { program: 'Reading Accelerator',                 text: "RI.4.1, Reading Accelerator, Digital Activity, Skill: 7, Lesson: 2, Activity: Comprehension Check, Digital, Independent Practice, Student, Activity, Located under the 'Practice' tab. See: (https://epsconnect.epslearning.com)" }
+];
+
 // ── State ─────────────────────────────────────────────────────────────────
 let citations = [];
 let formTags  = [];
@@ -627,7 +645,24 @@ async function loadFromStorage() {
         document.getElementById('storage-banner').style.background = '#475569';
         setStatus('Local storage — citations saved to this browser only');
     }
+    maybeSeedExamples();
     renderAll();
+}
+
+// Seed the Example citations once per browser, only when the library is empty.
+// Uses a localStorage flag so deleted examples don't keep reappearing on reload.
+function maybeSeedExamples() {
+    try {
+        if (citations.length === 0 && !localStorage.getItem('eps_examples_seeded')) {
+            citations = EXAMPLE_CITATIONS.map((ex, i) => ({
+                id: (Date.now() + i).toString(),
+                text: ex.text, program: ex.program,
+                tags: ['Example'], createdAt: Date.now() + i
+            }));
+            localStorage.setItem('eps_examples_seeded', '1');
+            saveToStorage();
+        }
+    } catch(e) {}
 }
 
 async function saveToStorage() {
@@ -814,6 +849,25 @@ function clearForm() {
     formTags = [];
     renderFormTags();
     updatePreview();
+}
+
+// ── Examples ────────────────────────────────────────────────────────────────
+function loadExamples() {
+    const existing = new Set(citations.map(c => c.text));
+    const toAdd = EXAMPLE_CITATIONS
+        .filter(ex => !existing.has(ex.text))
+        .map((ex, i) => ({
+            id: (Date.now() + i).toString(),
+            text: ex.text,
+            program: ex.program,
+            tags: ['Example'],
+            createdAt: Date.now() + i
+        }));
+    if (!toAdd.length) { showToast('Examples already loaded'); return; }
+    citations = [...toAdd, ...citations];
+    saveToStorage();
+    renderAll();
+    showToast(`Added ${toAdd.length} example${toAdd.length !== 1 ? 's' : ''}`);
 }
 
 // ── Library ────────────────────────────────────────────────────────────────
