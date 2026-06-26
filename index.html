@@ -1479,9 +1479,8 @@ function exportCSV() {
 
 const GITHUB_LOG = {
     enabled:       true,                                    // ← set to true after setup
-    dispatchToken: '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',                                       // ← paste DISPATCH_TOKEN PAT here
-                                                             //   (public_repo scope only — safe for public repo)
-    repo:          'phenix-rising/eps-citation-generator',  // already correct
+    dispatchToken: '${{ secrets.DISPATCH_TOKEN }}',  // Will be replaced during build
+    repo:          'phenix-rising/eps-citation-generator', 
     branch:        'main'
 };
 
