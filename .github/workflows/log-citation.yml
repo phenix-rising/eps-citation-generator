@@ -23,7 +23,12 @@ jobs:
         with:
           token: ${{ secrets.CITATION_LOG_TOKEN }}
 
-      # ── 2. Append the incoming citation to citations-log.json ──────────
+      # ── 2. Inject DISPATCH_TOKEN ────────────────────────────────────────
+      - name: Inject DISPATCH_TOKEN
+        run: |
+          sed -i "s|'\${{ secrets.DISPATCH_TOKEN }}'|'${{ secrets.DISPATCH_TOKEN }}'|g" index.html
+
+      # ── 3. Append the incoming citation to citations-log.json ──────────
       - name: Append citation
         env:
           CITATION_ID:        ${{ github.event.client_payload.id }}
@@ -64,7 +69,7 @@ jobs:
           print(f"Appended citation #{len(log)}: {entry['program']}")
           PYEOF
 
-      # ── 3. Commit the updated log back to the repo ─────────────────────
+      # ── 4. Commit the updated log back to the repo ─────────────────────
       - name: Commit log
         run: |
           git config user.name  "Citation Logger"
