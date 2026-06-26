@@ -1459,7 +1459,7 @@ function exportCSV() {
 //   secret token stored only in GitHub's encrypted secret store — never here.
 //
 // TO ENABLE:
-//   1. Go to github.com/phenix-rising/eps-citation-generator/settings/secrets/actions
+//   1. Go to github.com/[UserName]/eps-citation-generator/settings/secrets/actions
 //   2. Click "New repository secret"
 //   3. Name:  CITATION_LOG_TOKEN
 //      Value: your Fine-Grained PAT (Contents: read+write, on this repo only)
@@ -1478,8 +1478,8 @@ function exportCSV() {
 //   secret, which is never exposed to the browser.
 
 const GITHUB_LOG = {
-    enabled:       false,                                    // ← set to true after setup
-    dispatchToken: '',                                       // ← paste DISPATCH_TOKEN PAT here
+    enabled:       true,                                    // ← set to true after setup
+    dispatchToken: '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',                                       // ← paste DISPATCH_TOKEN PAT here
                                                              //   (public_repo scope only — safe for public repo)
     repo:          'phenix-rising/eps-citation-generator',  // already correct
     branch:        'main'
