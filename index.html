@@ -1476,6 +1476,9 @@ function exportCSV() {
 //   to store in the HTML for a public repo because it has no file-write access.
 //   The actual file write is done entirely by the Action using the server-side
 //   secret, which is never exposed to the browser.
+//   As a precaution, DISPATCH_TOKEN is injected to '${{ secrets.DISPATCH_TOKEN }}' 
+//   from the .github/workflows/log-citation.yml
+
 
 const GITHUB_LOG = {
     enabled:       true,                                    // ← set to true after setup
