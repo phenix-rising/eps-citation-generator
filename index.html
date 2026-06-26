@@ -4,251 +4,564 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPS Citation Generator</title>
-    <script src="https://cdn.tailwindcss.com/3.4.16/tailwind.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-        .toast-enter { animation: slideUp 0.25s ease-out; }
-        @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .tag-pill { transition: all 0.15s ease; }
-        .tag-pill:hover { transform: translateY(-1px); }
-        input[type="checkbox"] { accent-color: #1e3a8a; }
-        .citation-card { transition: box-shadow 0.15s ease; }
-        .citation-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .storage-badge { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); }
-        details > summary { list-style: none; cursor: pointer; }
-        details > summary::-webkit-details-marker { display: none; }
-        .char-warning { color: #dc2626; }
-        select, input, textarea { outline: none; }
-        select:focus, input:focus, textarea:focus { border-color: #1e3a8a !important; box-shadow: 0 0 0 3px rgba(30,58,138,0.12); }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── Layout ── */
+        .banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.01em;
+        }
+        .page { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
+
+        /* ── Card ── */
+        .card {
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            padding: 14px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-header-title {
+            font-size: 10px;
+            font-weight: 900;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+        .card-body { padding: 24px; }
+
+        /* ── Grid ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .col-span-2 { grid-column: span 2; }
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .col-span-2 { grid-column: span 1; }
+        }
+
+        /* ── Form Elements ── */
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        .label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .label-note { font-weight: 400; color: #94a3b8; text-transform: none; letter-spacing: 0; font-size: 10px; }
+        .label-row { display: flex; align-items: center; justify-content: space-between; }
+
+        input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+            width: 100%;
+            height: 38px;
+            padding: 0 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-family: inherit;
+            font-size: 13px;
+            color: #0f172a;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        textarea {
+            height: 80px;
+            padding: 10px 12px;
+            resize: none;
+            line-height: 1.5;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
+        }
+        input::placeholder, textarea::placeholder { color: #cbd5e1; }
+
+        /* Abbreviate checkbox row */
+        .abbr-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .abbr-row input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #1e3a8a;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* ── Preview ── */
+        .preview-box {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .preview-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 10px;
+        }
+        .preview-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #f8fafc;
+            line-height: 1.7;
+        }
+        .preview-text.empty { color: #475569; }
+
+        /* ── Buttons ── */
+        .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-ghost { background: #f1f5f9; color: #475569; }
+        .btn-ghost:hover { background: #e2e8f0; }
+        .btn-primary { background: #1e3a8a; color: white; }
+        .btn-primary:hover { background: #1e40af; }
+        .btn-amber { background: #fbbf24; color: #1c1917; }
+        .btn-amber:hover { background: #f59e0b; }
+        .btn-danger { background: #fee2e2; color: #dc2626; }
+        .btn-danger:hover { background: #fecaca; }
+        .btn-sm { padding: 6px 12px; font-size: 10px; border-radius: 8px; }
+        .btn-link {
+            background: none; border: none; cursor: pointer;
+            font-family: inherit; font-size: 10px; font-weight: 700;
+            color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 0; transition: color 0.15s;
+        }
+        .btn-link:hover { color: #ef4444; }
+
+        /* ── Tags section ── */
+        .tags-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .tags-section .label { margin-bottom: 8px; }
+        .tag-input-row { display: flex; gap: 8px; margin-top: 8px; }
+        .tag-input-row input { flex: 1; }
+        .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 24px; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            line-height: 1.4;
+        }
+        .chip-amber { background: #fef3c7; color: #92400e; }
+        .chip-blue { background: #dbeafe; color: #1e40af; }
+        .chip-slate { background: #f1f5f9; color: #64748b; }
+        .chip-remove {
+            cursor: pointer; opacity: 0.5; font-size: 13px; line-height: 1;
+            margin-left: 2px; font-weight: 400;
+        }
+        .chip-remove:hover { opacity: 1; }
+
+        /* ── Library header ── */
+        .lib-header { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; }
+        .lib-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-row .search-wrap { flex: 1; min-width: 180px; position: relative; }
+        .filter-row .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
+        .filter-row .search-wrap input { padding-left: 32px; }
+        .filter-row select { width: auto; flex-shrink: 0; font-size: 12px; }
+
+        /* ── Citation cards ── */
+        .citation-card {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f8fafc;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            transition: background 0.1s;
+        }
+        .citation-card:last-child { border-bottom: none; }
+        .citation-card:hover { background: #fafafa; }
+        .citation-card:hover .copy-btn { opacity: 1; }
+        .citation-card input[type="checkbox"] {
+            width: 15px; height: 15px; margin-top: 2px;
+            flex-shrink: 0; accent-color: #1e3a8a; cursor: pointer;
+        }
+        .citation-body { flex: 1; min-width: 0; }
+        .citation-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+        .citation-text { font-size: 12px; color: #334155; line-height: 1.65; }
+        .citation-date { font-size: 10px; color: #94a3b8; margin-top: 5px; }
+        .copy-btn {
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            color: #94a3b8;
+            transition: opacity 0.15s, background 0.15s;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover { background: #f1f5f9; color: #475569; }
+
+        /* ── Library footer ── */
+        .lib-footer {
+            padding: 12px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .lib-footer-spacer { flex: 1; }
+
+        /* ── Empty state ── */
+        .empty-state { padding: 48px 24px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+        /* ── Header ── */
+        .page-header { margin-bottom: 28px; display: flex; align-items: flex-start; justify-content: space-between; }
+        .page-header-left p.eyebrow { font-size: 10px; font-weight: 900; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 4px; }
+        .page-header-left h1 { font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; line-height: 1.2; }
+        .page-header-left p.sub { font-size: 13px; color: #64748b; margin-top: 4px; }
+        .counter-block { text-align: right; }
+        .counter-num { font-size: 32px; font-weight: 900; color: #1e3a8a; line-height: 1; }
+        .counter-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; }
+
+        /* ── Char count ── */
+        .char-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 5px; }
+        .char-count { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+        .char-count.warn { color: #dc2626; }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-backdrop.open { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal h3 { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+        .modal p { font-size: 12px; color: #64748b; margin-bottom: 16px; }
+        .modal .btn-row { margin-top: 0; }
+
+        /* ── Toast ── */
+        .toast {
+            display: none;
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: #0f172a;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 100;
+            align-items: center;
+            gap: 8px;
+            animation: slideUp 0.2s ease-out;
+        }
+        .toast.show { display: flex; }
+        @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-900">
+<body>
 
-<!-- Storage Status Banner -->
-<div id="storage-banner" class="storage-badge text-white text-xs font-bold px-4 py-2 flex items-center gap-2 justify-center">
-    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
+<!-- Banner -->
+<div id="storage-banner" class="banner">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2.5"/><path stroke-width="2" d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.3-6.7-2.1 2.1M8.4 15.6l-2.1 2.1m0-11.4 2.1 2.1m7.2 7.2 2.1 2.1"/></svg>
     <span id="storage-status">Connecting to persistent storage...</span>
 </div>
 
-<div class="max-w-4xl mx-auto px-4 py-8 md:px-6">
+<div class="page">
 
     <!-- Header -->
-    <header class="mb-8">
-        <div class="flex items-start justify-between">
-            <div>
-                <p class="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-1">EPS Learning</p>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Citation Generator</h1>
-                <p class="text-slate-500 text-sm mt-1">Build, tag, and export curriculum alignment citations</p>
-            </div>
-            <div class="text-right">
-                <div id="citation-counter" class="text-3xl font-black text-blue-900">0</div>
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saved</div>
-            </div>
+    <header class="page-header">
+        <div class="page-header-left">
+            <p class="eyebrow">EPS Learning</p>
+            <h1>Citation Generator</h1>
+            <p class="sub">Build, tag, and export curriculum alignment citations</p>
+        </div>
+        <div class="counter-block">
+            <div class="counter-num" id="citation-counter">0</div>
+            <div class="counter-label">Saved</div>
         </div>
     </header>
 
     <!-- Builder Card -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="text-xs font-black text-slate-700 uppercase tracking-widest">Build Citation</h2>
-            <button onclick="clearForm()" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors">Clear Form</button>
+    <div class="card">
+        <div class="card-header">
+            <span class="card-header-title">Build Citation</span>
+            <button class="btn-link" onclick="clearForm()">Clear Form</button>
         </div>
-
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card-body">
+            <div class="form-grid">
 
                 <!-- Program -->
-                <div class="md:col-span-2">
-                    <label class="field-label">EPS Program Name</label>
-                    <input id="program" list="program-list" class="field-input w-full" placeholder="Start typing or select program...">
+                <div class="field col-span-2">
+                    <label class="label">EPS Program Name</label>
+                    <input id="program" list="program-list" placeholder="Start typing or select a program...">
                     <datalist id="program-list"></datalist>
                 </div>
 
                 <!-- Standards -->
-                <div>
-                    <label class="field-label">Standards Code <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
-                    <input id="standards" class="field-input w-full" placeholder="e.g., RI.4.1, RF.2.3b">
+                <div class="field">
+                    <label class="label">Standards Code <span class="label-note">(optional)</span></label>
+                    <input id="standards" placeholder="e.g., RI.4.1, RF.2.3b">
                 </div>
 
                 <!-- Material Type -->
-                <div>
-                    <div class="flex justify-between items-end mb-1">
-                        <label class="field-label mb-0">Material Type</label>
-                        <label class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer">
-                            <input type="checkbox" id="abbr-check" class="w-3 h-3"> Abbreviate
+                <div class="field">
+                    <div class="label-row">
+                        <label class="label" for="material">Material Type</label>
+                        <label class="abbr-row">
+                            <input type="checkbox" id="abbr-check"> Abbreviate
                         </label>
                     </div>
-                    <input id="material" list="material-list" class="field-input w-full" placeholder="Select or type material...">
+                    <input id="material" list="material-list" placeholder="Select or type material...">
                     <datalist id="material-list"></datalist>
                 </div>
 
-                <!-- Dynamic Program Fields -->
-                <div id="dynamic-fields" class="contents"></div>
+                <!-- Dynamic fields injected here -->
+                <div id="dynamic-fields" style="display:contents"></div>
 
                 <!-- Page Numbers -->
-                <div>
-                    <label class="field-label">Page Number(s)</label>
-                    <input id="page" class="field-input w-full" placeholder="e.g., 42 or 64–68">
+                <div class="field">
+                    <label class="label">Page Number(s)</label>
+                    <input id="page" placeholder="e.g., 42 or 64–68">
                 </div>
 
                 <!-- Format -->
-                <div>
-                    <label class="field-label">Format <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
-                    <select id="format" class="field-input w-full">
+                <div class="field">
+                    <label class="label">Format <span class="label-note">(optional)</span></label>
+                    <select id="format">
                         <option value="">Select...</option>
                         <option>Digital</option><option>Print</option><option>Hybrid</option>
                     </select>
                 </div>
 
                 <!-- Delivery -->
-                <div>
-                    <label class="field-label">Delivery Method <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
-                    <select id="delivery" class="field-input w-full">
+                <div class="field">
+                    <label class="label">Delivery Method <span class="label-note">(optional)</span></label>
+                    <select id="delivery">
                         <option value="">Select...</option>
-                        <option>Whole Group</option><option>Small Group</option><option>Direct Instruction</option><option>Independent Practice</option>
+                        <option>Whole Group</option><option>Small Group</option>
+                        <option>Direct Instruction</option><option>Independent Practice</option>
                     </select>
                 </div>
 
                 <!-- Audience -->
-                <div>
-                    <label class="field-label">Audience</label>
-                    <select id="audience" class="field-input w-full">
+                <div class="field">
+                    <label class="label">Audience</label>
+                    <select id="audience">
                         <option value="">Select...</option>
                         <option>Teacher</option><option>Student</option>
                     </select>
                 </div>
 
                 <!-- Evidence Type -->
-                <div>
-                    <label class="field-label">Evidence Type</label>
-                    <select id="evidence" class="field-input w-full">
+                <div class="field">
+                    <label class="label">Evidence Type</label>
+                    <select id="evidence">
                         <option value="">Select...</option>
                         <option>Narrative</option><option>Activity</option>
                     </select>
                 </div>
 
                 <!-- URL -->
-                <div class="md:col-span-2">
-                    <label class="field-label">Evidence Web Link <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
-                    <input id="url" class="field-input w-full" placeholder="https://...">
+                <div class="field col-span-2">
+                    <label class="label">Evidence Web Link <span class="label-note">(optional)</span></label>
+                    <input id="url" placeholder="https://...">
                 </div>
 
                 <!-- Directions -->
-                <div class="md:col-span-2">
-                    <div class="flex justify-between items-end mb-1">
-                        <label class="field-label mb-0">Location Notes & Cross-References</label>
-                        <span id="char-count" class="text-[10px] text-slate-400 font-mono">0 / 300</span>
+                <div class="field col-span-2">
+                    <div class="char-row">
+                        <label class="label" style="margin-bottom:0">Location Notes &amp; Cross-References</label>
+                        <span class="char-count" id="char-count">0 / 300</span>
                     </div>
-                    <textarea id="directions" class="field-input w-full h-20 resize-none" maxlength="300" placeholder="Short directions to locate cited evidence, where to look in the material, and/or cross-reference to other material type..."></textarea>
+                    <textarea id="directions" maxlength="300" placeholder="Short directions to locate cited evidence, where to look in the material, and/or cross-reference to other material type..."></textarea>
                 </div>
-            </div>
+
+            </div><!-- /form-grid -->
 
             <!-- Live Preview -->
-            <div class="bg-slate-900 p-5 rounded-xl mt-6">
-                <div class="flex items-center gap-2 mb-3">
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Preview</p>
-                </div>
-                <p id="preview-text" class="text-sm font-medium leading-relaxed text-white">Citation will appear here as you fill in fields above...</p>
+            <div class="preview-box">
+                <div class="preview-label">Live Preview</div>
+                <p id="preview-text" class="preview-text empty">Citation will appear here as you fill in fields above...</p>
             </div>
 
-            <div class="flex gap-3 mt-5">
-                <button onclick="handleCopy()" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs uppercase hover:bg-slate-200 transition-colors flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+            <!-- Action Buttons -->
+            <div class="btn-row">
+                <button class="btn btn-ghost" onclick="handleCopy()">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
                     Copy
                 </button>
-                <button onclick="handleSave()" class="px-5 py-2.5 bg-blue-900 text-white rounded-xl font-black text-xs uppercase hover:bg-blue-800 transition-colors flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <button class="btn btn-primary" onclick="handleSave()">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     Save Citation
                 </button>
             </div>
 
-            <!-- Tags — below actions so they don't imply tags affect the citation text -->
-            <div class="mt-5 pt-5 border-t border-slate-100">
-                <label class="field-label mb-2">Tags <span class="text-slate-400 font-normal normal-case">(applied when saved)</span></label>
-                <div class="flex gap-2 flex-wrap mb-2 min-h-6" id="form-tags"></div>
-                <div class="flex gap-2">
-                    <input id="tag-input" class="field-input flex-1" placeholder="Add a tag (e.g., Grade 3, Phonics, RFP-2024)..." maxlength="30">
-                    <button onclick="addFormTag()" class="px-4 py-2 bg-amber-400 text-slate-900 rounded-lg font-black text-xs uppercase hover:bg-amber-300 transition-colors whitespace-nowrap">+ Add Tag</button>
+            <!-- Tags — below actions, applied on save -->
+            <div class="tags-section">
+                <label class="label">Tags <span class="label-note">(applied when saved)</span></label>
+                <div class="tag-chips" id="form-tags"></div>
+                <div class="tag-input-row">
+                    <input id="tag-input" placeholder="Add a tag — e.g., Grade 3, Phonics, RFP-2024..." maxlength="30">
+                    <button class="btn btn-amber btn-sm" onclick="addFormTag()">+ Add Tag</button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Library -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100">
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-xs font-black text-slate-700 uppercase tracking-widest">Saved Citations</h2>
-                <div class="flex gap-2 items-center" id="lib-actions"></div>
+        </div><!-- /card-body -->
+    </div><!-- /card -->
+
+    <!-- Library Card -->
+    <div class="card">
+        <div class="lib-header">
+            <div class="lib-title-row">
+                <span class="card-header-title">Saved Citations</span>
             </div>
-
-            <!-- Search + Filter Row -->
-            <div class="flex gap-2 flex-wrap">
-                <div class="flex-1 min-w-48 relative">
-                    <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke-width="2"/></svg>
-                    <input id="search-input" class="field-input w-full pl-9 py-2" placeholder="Search citations...">
+            <div class="filter-row">
+                <div class="search-wrap">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke-width="2"/></svg>
+                    <input id="search-input" placeholder="Search citations...">
                 </div>
-                <select id="filter-program" class="field-input py-2 text-xs">
+                <select id="filter-program" style="min-width:130px">
                     <option value="">All Programs</option>
                 </select>
-                <select id="filter-tag" class="field-input py-2 text-xs">
+                <select id="filter-tag" style="min-width:110px">
                     <option value="">All Tags</option>
                 </select>
             </div>
         </div>
 
-        <div id="citation-list" class="divide-y divide-slate-100 min-h-24"></div>
+        <div id="citation-list"></div>
 
-        <div id="lib-footer" class="hidden px-6 py-3 bg-slate-50 border-t border-slate-100 flex gap-3 flex-wrap">
-            <button onclick="selectAll()" class="text-xs font-bold text-slate-600 uppercase hover:text-slate-900">Select All</button>
-            <button onclick="deselectAll()" class="text-xs font-bold text-slate-400 uppercase hover:text-slate-600">Deselect</button>
-            <div class="flex-1"></div>
-            <button onclick="bulkTagModal()" id="bulk-tag-btn" class="hidden px-3 py-1.5 text-xs font-bold text-amber-700 uppercase border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors">Tag Selected</button>
-            <button onclick="copySelected()" id="copy-sel-btn" class="hidden px-3 py-1.5 text-xs font-bold text-slate-600 uppercase border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">Copy Selected</button>
-            <button onclick="removeSelected()" id="del-sel-btn" class="hidden px-3 py-1.5 text-xs font-bold text-red-600 uppercase border border-red-100 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        <div class="lib-footer" id="lib-footer" style="display:none">
+            <button class="btn btn-ghost btn-sm" onclick="selectAll()">Select All</button>
+            <button class="btn btn-ghost btn-sm" onclick="deselectAll()">Deselect</button>
+            <div class="lib-footer-spacer"></div>
+            <button class="btn btn-ghost btn-sm" id="bulk-tag-btn" style="display:none;color:#92400e;background:#fef3c7" onclick="bulkTagModal()">Tag Selected</button>
+            <button class="btn btn-ghost btn-sm" id="copy-sel-btn" style="display:none" onclick="copySelected()">Copy Selected</button>
+            <button class="btn btn-danger btn-sm" id="del-sel-btn" style="display:none" onclick="removeSelected()">
+                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 Delete
             </button>
-            <button onclick="exportCSV()" class="px-3 py-1.5 text-xs font-bold text-blue-700 uppercase border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <button class="btn btn-ghost btn-sm" style="color:#1d4ed8;background:#dbeafe" onclick="exportCSV()">
+                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Export CSV
             </button>
         </div>
     </div>
-</div>
+
+</div><!-- /page -->
 
 <!-- Bulk Tag Modal -->
-<div id="tag-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <h3 class="font-black text-slate-900 mb-1">Tag Selected Citations</h3>
-        <p class="text-xs text-slate-500 mb-4">Add a tag to all selected citations at once.</p>
-        <input id="bulk-tag-input" class="field-input w-full mb-4" placeholder="Enter tag..." maxlength="30">
-        <div class="flex gap-3">
-            <button onclick="closeBulkTagModal()" class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs uppercase hover:bg-slate-200">Cancel</button>
-            <button onclick="applyBulkTag()" class="flex-1 px-4 py-2.5 bg-amber-400 text-slate-900 rounded-xl font-black text-xs uppercase hover:bg-amber-300">Apply Tag</button>
+<div class="modal-backdrop" id="tag-modal">
+    <div class="modal">
+        <h3>Tag Selected Citations</h3>
+        <p>Add one tag to all selected citations at once.</p>
+        <div class="field" style="margin-bottom:16px">
+            <input id="bulk-tag-input" placeholder="Enter tag..." maxlength="30">
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-ghost" style="flex:1" onclick="closeBulkTagModal()">Cancel</button>
+            <button class="btn btn-amber" style="flex:1" onclick="applyBulkTag()">Apply Tag</button>
         </div>
     </div>
 </div>
 
 <!-- Toast -->
-<div id="toast" class="fixed bottom-6 right-6 hidden z-50">
-    <div class="bg-slate-900 text-white px-5 py-3 rounded-full font-bold text-xs shadow-xl flex items-center gap-2 toast-enter">
-        <svg id="toast-icon" class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-        <span id="toast-msg"></span>
-    </div>
+<div class="toast" id="toast">
+    <svg width="13" height="13" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+    <span id="toast-msg"></span>
 </div>
-
-<style>
-    .field-label { display: block; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
-    .field-input { padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: white; font-size: 13px; color: #0f172a; width: 100%; transition: border-color 0.15s; }
-    .tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
-    .tag-chip-amber { background: #fef3c7; color: #92400e; }
-    .tag-chip-blue { background: #dbeafe; color: #1e3a8a; }
-    .tag-chip-remove { cursor: pointer; opacity: 0.6; font-size: 12px; line-height: 1; }
-    .tag-chip-remove:hover { opacity: 1; }
-</style>
 
 <script>
 // ── Registry ──────────────────────────────────────────────────────────────
@@ -287,92 +600,81 @@ const MATERIALS = [
 
 // ── State ─────────────────────────────────────────────────────────────────
 let citations = [];
-let formTags = [];
+let formTags  = [];
 let selectedIds = new Set();
-let storageReady = false;
 const STORAGE_KEY = 'eps_citations_v2';
 
-// ── Storage (persistent via window.storage API, fallback to localStorage) ─
+// ── Storage ────────────────────────────────────────────────────────────────
 async function loadFromStorage() {
     try {
         const result = await window.storage.get(STORAGE_KEY);
         if (result && result.value) {
             citations = JSON.parse(result.value);
-            document.getElementById('storage-status').textContent = `Persistent storage active — ${citations.length} citation${citations.length !== 1 ? 's' : ''} synced`;
-            storageReady = true;
+            setStatus(`Persistent storage active — ${citations.length} citation${citations.length !== 1 ? 's' : ''} synced`);
         } else {
-            // Try migrating from old localStorage
-            const legacy = localStorage.getItem('eps_citations');
+            const legacy = localStorage.getItem('eps_citations') || localStorage.getItem('eps_citations_v2');
             if (legacy) {
                 citations = JSON.parse(legacy).map(c => ({ ...c, tags: c.tags || [] }));
                 await saveToStorage();
                 localStorage.removeItem('eps_citations');
-                document.getElementById('storage-status').textContent = `Migrated ${citations.length} citation${citations.length !== 1 ? 's' : ''} to persistent storage`;
+                localStorage.removeItem('eps_citations_v2');
+                setStatus(`Migrated ${citations.length} citation${citations.length !== 1 ? 's' : ''} to persistent storage`);
             } else {
-                document.getElementById('storage-status').textContent = 'Persistent storage active — ready';
+                setStatus('Persistent storage active — ready');
             }
-            storageReady = true;
         }
     } catch(e) {
-        // Fallback to localStorage
         try {
-            const local = localStorage.getItem('eps_citations') || localStorage.getItem('eps_citations_v2');
+            const local = localStorage.getItem('eps_citations_v2') || localStorage.getItem('eps_citations');
             citations = local ? JSON.parse(local).map(c => ({ ...c, tags: c.tags || [] })) : [];
         } catch(e2) { citations = []; }
-        document.getElementById('storage-banner').style.background = '#64748b';
-        document.getElementById('storage-status').textContent = 'Local storage only — citations saved to this browser';
-        storageReady = true;
+        document.getElementById('storage-banner').style.background = '#475569';
+        setStatus('Local storage — citations saved to this browser only');
     }
     renderAll();
 }
 
 async function saveToStorage() {
-    try {
-        await window.storage.set(STORAGE_KEY, JSON.stringify(citations));
-    } catch(e) {
-        try { localStorage.setItem('eps_citations_v2', JSON.stringify(citations)); } catch(e2) {}
-    }
+    try { await window.storage.set(STORAGE_KEY, JSON.stringify(citations)); }
+    catch(e) { try { localStorage.setItem('eps_citations_v2', JSON.stringify(citations)); } catch(e2) {} }
 }
 
-// ── Init Datalists ────────────────────────────────────────────────────────
+function setStatus(msg) { document.getElementById('storage-status').textContent = msg; }
+
+// ── Init datalists ────────────────────────────────────────────────────────
 PROGRAMS.forEach(p => document.getElementById('program-list').innerHTML += `<option value="${p.program}">`);
 MATERIALS.forEach(m => document.getElementById('material-list').innerHTML += `<option value="${m.name}">`);
 
-// ── Citation Builder ───────────────────────────────────────────────────────
+// ── Citation builder ───────────────────────────────────────────────────────
 function getProgramMeta() {
     return PROGRAMS.find(p => p.program === document.getElementById('program').value) || {};
 }
 
 function getMaterialDisplay() {
     const val = document.getElementById('material').value;
-    const isAbbr = document.getElementById('abbr-check').checked;
+    const abbr = document.getElementById('abbr-check').checked;
     const item = MATERIALS.find(m => m.key === val || m.name === val);
     if (!item) return val;
-    return isAbbr ? item.key : item.name;
+    return abbr ? item.key : item.name;
 }
 
 function formatPage(val) {
-    if (!val) return null;
+    if (!val || !val.trim()) return null;
     return /[\-,\s]/.test(val.trim()) ? `pp. ${val.trim()}` : `p. ${val.trim()}`;
 }
 
 function buildCitationText() {
     const prog = getProgramMeta();
+    const v = id => document.getElementById(id)?.value || '';
     const parts = [
-        document.getElementById('standards').value,
-        document.getElementById('program').value,
-        getMaterialDisplay(),
-        document.getElementById('unit')?.value ? `${prog.unit}: ${document.getElementById('unit').value}` : null,
-        document.getElementById('lesson')?.value ? `${prog.lesson}: ${document.getElementById('lesson').value}` : null,
-        document.getElementById('task')?.value ? `${prog.task}: ${document.getElementById('task').value}` : null,
-        formatPage(document.getElementById('page').value),
-        document.getElementById('format').value,
-        document.getElementById('delivery').value,
-        document.getElementById('audience').value,
-        document.getElementById('evidence').value,
-        document.getElementById('directions').value
+        v('standards'), v('program'), getMaterialDisplay(),
+        v('unit')   ? `${prog.unit}: ${v('unit')}`     : null,
+        v('lesson') ? `${prog.lesson}: ${v('lesson')}` : null,
+        v('task')   ? `${prog.task}: ${v('task')}`     : null,
+        formatPage(v('page')),
+        v('format'), v('delivery'), v('audience'), v('evidence'), v('directions')
     ].filter(Boolean);
-    const url = document.getElementById('url').value;
+    const url = v('url');
     return parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
 }
 
@@ -380,9 +682,9 @@ function updateDynamicFields() {
     const prog = getProgramMeta();
     const dyn = document.getElementById('dynamic-fields');
     let html = '';
-    ['unit', 'lesson', 'task'].forEach(k => {
+    ['unit','lesson','task'].forEach(k => {
         if (prog[k]) {
-            html += `<div class="flex flex-col gap-1 w-full"><label class="field-label">${prog[k]}</label><input id="${k}" class="field-input" placeholder="${prog[k]}..."></div>`;
+            html += `<div class="field"><label class="label">${prog[k]}</label><input id="${k}" placeholder="${prog[k]}..."></div>`;
         }
     });
     dyn.innerHTML = html;
@@ -393,16 +695,15 @@ function updatePreview() {
     const text = buildCitationText();
     const el = document.getElementById('preview-text');
     el.textContent = text || 'Citation will appear here as you fill in fields above...';
-    el.style.opacity = text ? '1' : '0.5';
+    el.classList.toggle('empty', !text);
 
-    // Char count
-    const dir = document.getElementById('directions').value.length;
+    const dir = (document.getElementById('directions').value || '').length;
     const cc = document.getElementById('char-count');
     cc.textContent = `${dir} / 300`;
-    cc.classList.toggle('char-warning', dir > 250);
+    cc.classList.toggle('warn', dir > 250);
 }
 
-// ── Form Tags ─────────────────────────────────────────────────────────────
+// ── Form tags ─────────────────────────────────────────────────────────────
 function addFormTag() {
     const input = document.getElementById('tag-input');
     const val = input.value.trim();
@@ -410,36 +711,26 @@ function addFormTag() {
     formTags.push(val);
     input.value = '';
     renderFormTags();
-    updatePreview();
 }
 
 function removeFormTag(tag) {
     formTags = formTags.filter(t => t !== tag);
     renderFormTags();
-    updatePreview();
 }
 
 function renderFormTags() {
     document.getElementById('form-tags').innerHTML = formTags.map(t =>
-        `<span class="tag-chip tag-chip-amber">${t}<span class="tag-chip-remove" onclick="removeFormTag('${t.replace(/'/g,"\\'")}')">×</span></span>`
+        `<span class="chip chip-amber">${escHtml(t)}<span class="chip-remove" onclick="removeFormTag('${escAttr(t)}')">×</span></span>`
     ).join('');
 }
 
-// Enter key adds tag
-document.getElementById('tag-input').addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); addFormTag(); }});
+document.getElementById('tag-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addFormTag(); } });
 
 // ── Save / Copy ────────────────────────────────────────────────────────────
 function handleSave() {
-    const text = buildCitationText();
-    if (!text.trim()) return;
-    const c = {
-        id: Date.now().toString(),
-        text,
-        program: document.getElementById('program').value || 'Manual',
-        tags: [...formTags],
-        createdAt: Date.now()
-    };
-    citations = [c, ...citations];
+    const text = buildCitationText().trim();
+    if (!text) return;
+    citations = [{ id: Date.now().toString(), text, program: document.getElementById('program').value || 'Manual', tags: [...formTags], createdAt: Date.now() }, ...citations];
     saveToStorage();
     showToast('Citation saved');
     renderAll();
@@ -453,8 +744,7 @@ function handleCopy() {
 
 function clearForm() {
     ['program','standards','material','page','format','delivery','audience','evidence','url','directions'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.value = '';
+        const el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('abbr-check').checked = false;
     document.getElementById('dynamic-fields').innerHTML = '';
@@ -463,11 +753,11 @@ function clearForm() {
     updatePreview();
 }
 
-// ── Library Render ─────────────────────────────────────────────────────────
-function getFilteredCitations() {
-    const search = document.getElementById('search-input')?.value.toLowerCase() || '';
-    const prog = document.getElementById('filter-program')?.value || '';
-    const tag = document.getElementById('filter-tag')?.value || '';
+// ── Library ────────────────────────────────────────────────────────────────
+function getFiltered() {
+    const search = (document.getElementById('search-input')?.value || '').toLowerCase();
+    const prog   = document.getElementById('filter-program')?.value || '';
+    const tag    = document.getElementById('filter-tag')?.value || '';
     return citations.filter(c => {
         if (prog && c.program !== prog) return false;
         if (tag && !(c.tags || []).includes(tag)) return false;
@@ -479,175 +769,127 @@ function getFilteredCitations() {
 function renderAll() {
     renderFilters();
     renderLibrary();
-    updateCitationCounter();
-}
-
-function updateCitationCounter() {
     document.getElementById('citation-counter').textContent = citations.length;
 }
 
 function renderFilters() {
     const programs = [...new Set(citations.map(c => c.program))].sort();
-    const tags = [...new Set(citations.flatMap(c => c.tags || []))].sort();
-
+    const tags     = [...new Set(citations.flatMap(c => c.tags || []))].sort();
     const fp = document.getElementById('filter-program');
     const ft = document.getElementById('filter-tag');
-    const curProg = fp.value, curTag = ft.value;
-
-    fp.innerHTML = '<option value="">All Programs</option>' + programs.map(p => `<option value="${p}"${p===curProg?' selected':''}>${p}</option>`).join('');
-    ft.innerHTML = '<option value="">All Tags</option>' + tags.map(t => `<option value="${t}"${t===curTag?' selected':''}>${t}</option>`).join('');
+    const cp = fp.value, ct = ft.value;
+    fp.innerHTML = '<option value="">All Programs</option>' + programs.map(p => `<option${p===cp?' selected':''}>${escHtml(p)}</option>`).join('');
+    ft.innerHTML = '<option value="">All Tags</option>' + tags.map(t => `<option${t===ct?' selected':''}>${escHtml(t)}</option>`).join('');
 }
 
 function renderLibrary() {
-    const list = document.getElementById('citation-list');
-    const filtered = getFilteredCitations();
-    const footer = document.getElementById('lib-footer');
+    const list     = document.getElementById('citation-list');
+    const footer   = document.getElementById('lib-footer');
+    const filtered = getFiltered();
 
     if (filtered.length === 0) {
-        list.innerHTML = `<div class="px-6 py-12 text-center text-slate-400 text-sm">${citations.length === 0 ? 'No citations saved yet. Build your first one above.' : 'No citations match your current filters.'}</div>`;
-        footer.classList.add('hidden');
+        list.innerHTML = `<div class="empty-state">${citations.length === 0 ? 'No citations saved yet. Build your first one above.' : 'No citations match your current filters.'}</div>`;
+        footer.style.display = 'none';
         return;
     }
 
-    footer.classList.remove('hidden');
+    footer.style.display = 'flex';
 
     list.innerHTML = filtered.map(c => `
-        <div class="citation-card px-6 py-4 flex gap-4 items-start group" data-id="${c.id}">
-            <input type="checkbox" class="mt-0.5 w-4 h-4 rounded flex-shrink-0" ${selectedIds.has(c.id)?'checked':''} onchange="toggleSelect('${c.id}')">
-            <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap gap-1 mb-2">
-                    <span class="tag-chip tag-chip-blue">${c.program}</span>
-                    ${(c.tags||[]).map(t => `<span class="tag-chip tag-chip-amber">${t}<span class="tag-chip-remove" onclick="removeTagFromCitation('${c.id}','${t.replace(/'/g,"\\'")}')">×</span></span>`).join('')}
-                    <button onclick="addTagToCitation('${c.id}')" class="tag-chip bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors px-2">+ tag</button>
+        <div class="citation-card">
+            <input type="checkbox" ${selectedIds.has(c.id)?'checked':''} onchange="toggleSelect('${c.id}')">
+            <div class="citation-body">
+                <div class="citation-chips">
+                    <span class="chip chip-blue">${escHtml(c.program)}</span>
+                    ${(c.tags||[]).map(t => `<span class="chip chip-amber">${escHtml(t)}<span class="chip-remove" onclick="removeTagFromCitation('${c.id}','${escAttr(t)}')">×</span></span>`).join('')}
+                    <button class="chip chip-slate" style="border:none;cursor:pointer;font-family:inherit;font-size:10px;font-weight:800" onclick="addTagToCitation('${c.id}')">+ tag</button>
                 </div>
-                <p class="text-xs text-slate-700 leading-relaxed">${c.text}</p>
-                <p class="text-[10px] text-slate-400 mt-1.5">${new Date(c.createdAt).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})}</p>
+                <p class="citation-text">${escHtml(c.text)}</p>
+                <p class="citation-date">${new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>
             </div>
-            <button onclick="copyCitation('${c.id}')" class="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1.5 rounded-lg hover:bg-slate-100" title="Copy">
-                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
+            <button class="copy-btn" onclick="copyCitation('${c.id}')" title="Copy citation">
+                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"/></svg>
             </button>
         </div>
     `).join('');
 
-    // Selection buttons
     const hasSel = selectedIds.size > 0;
-    document.getElementById('bulk-tag-btn').classList.toggle('hidden', !hasSel);
-    document.getElementById('copy-sel-btn').classList.toggle('hidden', !hasSel);
-    document.getElementById('del-sel-btn').classList.toggle('hidden', !hasSel);
+    document.getElementById('bulk-tag-btn').style.display  = hasSel ? 'inline-flex' : 'none';
+    document.getElementById('copy-sel-btn').style.display  = hasSel ? 'inline-flex' : 'none';
+    document.getElementById('del-sel-btn').style.display   = hasSel ? 'inline-flex' : 'none';
 }
 
-// ── Citation Tag Actions ──────────────────────────────────────────────────
+// ── Tag actions ───────────────────────────────────────────────────────────
 function addTagToCitation(id) {
     const tag = prompt('Enter tag:');
     if (!tag || !tag.trim()) return;
     citations = citations.map(c => c.id === id ? { ...c, tags: [...new Set([...(c.tags||[]), tag.trim()])] } : c);
-    saveToStorage();
-    renderAll();
+    saveToStorage(); renderAll();
 }
 
 function removeTagFromCitation(id, tag) {
     citations = citations.map(c => c.id === id ? { ...c, tags: (c.tags||[]).filter(t => t !== tag) } : c);
-    saveToStorage();
-    renderAll();
+    saveToStorage(); renderAll();
 }
 
 function copyCitation(id) {
     const c = citations.find(x => x.id === id);
-    if (!c) return;
-    navigator.clipboard.writeText(c.text).then(() => showToast('Citation copied'));
+    if (c) navigator.clipboard.writeText(c.text).then(() => showToast('Citation copied'));
 }
 
-// ── Selection Actions ─────────────────────────────────────────────────────
-function toggleSelect(id) {
-    selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
-    renderLibrary();
-}
-
-function selectAll() {
-    getFilteredCitations().forEach(c => selectedIds.add(c.id));
-    renderLibrary();
-}
-
-function deselectAll() {
-    selectedIds.clear();
-    renderLibrary();
-}
-
-function copySelected() {
-    const text = citations.filter(c => selectedIds.has(c.id)).map(c => c.text).join('\n\n');
-    navigator.clipboard.writeText(text).then(() => showToast(`Copied ${selectedIds.size} citation${selectedIds.size !== 1 ? 's' : ''}`));
-}
-
-function removeSelected() {
-    if (!confirm(`Delete ${selectedIds.size} citation${selectedIds.size !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+// ── Selection ─────────────────────────────────────────────────────────────
+function toggleSelect(id) { selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id); renderLibrary(); }
+function selectAll()  { getFiltered().forEach(c => selectedIds.add(c.id)); renderLibrary(); }
+function deselectAll(){ selectedIds.clear(); renderLibrary(); }
+function copySelected(){ navigator.clipboard.writeText(citations.filter(c=>selectedIds.has(c.id)).map(c=>c.text).join('\n\n')).then(()=>showToast(`Copied ${selectedIds.size} citation${selectedIds.size!==1?'s':''}`)); }
+function removeSelected(){
+    if(!confirm(`Delete ${selectedIds.size} citation${selectedIds.size!==1?'s':''}? This cannot be undone.`)) return;
     citations = citations.filter(c => !selectedIds.has(c.id));
-    selectedIds.clear();
-    saveToStorage();
-    renderAll();
-    showToast('Citations deleted');
+    selectedIds.clear(); saveToStorage(); renderAll(); showToast('Deleted');
 }
 
-// ── Bulk Tag Modal ────────────────────────────────────────────────────────
-function bulkTagModal() {
-    document.getElementById('tag-modal').classList.remove('hidden');
-    document.getElementById('bulk-tag-input').value = '';
-    document.getElementById('bulk-tag-input').focus();
-}
-
-function closeBulkTagModal() {
-    document.getElementById('tag-modal').classList.add('hidden');
-}
-
+// ── Bulk tag modal ─────────────────────────────────────────────────────────
+function bulkTagModal()      { document.getElementById('tag-modal').classList.add('open'); document.getElementById('bulk-tag-input').value=''; document.getElementById('bulk-tag-input').focus(); }
+function closeBulkTagModal() { document.getElementById('tag-modal').classList.remove('open'); }
 function applyBulkTag() {
     const tag = document.getElementById('bulk-tag-input').value.trim();
     if (!tag) return;
     citations = citations.map(c => selectedIds.has(c.id) ? { ...c, tags: [...new Set([...(c.tags||[]), tag])] } : c);
-    saveToStorage();
-    closeBulkTagModal();
-    renderAll();
-    showToast(`Tagged ${selectedIds.size} citation${selectedIds.size !== 1 ? 's' : ''} with "${tag}"`);
+    saveToStorage(); closeBulkTagModal(); renderAll();
+    showToast(`Tagged ${selectedIds.size} citation${selectedIds.size!==1?'s':''} with "${tag}"`);
 }
-
-document.getElementById('bulk-tag-input').addEventListener('keydown', e => { if(e.key === 'Enter') applyBulkTag(); });
-document.getElementById('tag-modal').addEventListener('click', e => { if(e.target === document.getElementById('tag-modal')) closeBulkTagModal(); });
+document.getElementById('bulk-tag-input').addEventListener('keydown', e => { if(e.key==='Enter') applyBulkTag(); });
+document.getElementById('tag-modal').addEventListener('click', e => { if(e.target===document.getElementById('tag-modal')) closeBulkTagModal(); });
 
 // ── Export ────────────────────────────────────────────────────────────────
 function exportCSV() {
-    const rows = [['Program', 'Tags', 'Citation', 'Date']];
-    citations.forEach(c => rows.push([
-        `"${c.program}"`,
-        `"${(c.tags||[]).join('; ')}"`,
-        `"${c.text.replace(/"/g,'""')}"`,
-        `"${new Date(c.createdAt).toLocaleDateString()}"`
-    ]));
-    const csv = rows.map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url; link.download = `eps-citations-${new Date().toISOString().slice(0,10)}.csv`; link.click();
+    const rows = [['Program','Tags','Citation','Date']];
+    citations.forEach(c => rows.push([`"${c.program}"`,`"${(c.tags||[]).join('; ')}"`,`"${c.text.replace(/"/g,'""')}"`,`"${new Date(c.createdAt).toLocaleDateString()}"`]));
+    const blob = new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `eps-citations-${new Date().toISOString().slice(0,10)}.csv`; a.click();
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────
 let toastTimer;
-function showToast(msg, type = 'success') {
+function showToast(msg) {
     clearTimeout(toastTimer);
     document.getElementById('toast-msg').textContent = msg;
-    const toast = document.getElementById('toast');
-    toast.classList.remove('hidden');
-    toastTimer = setTimeout(() => toast.classList.add('hidden'), 2500);
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ── Event Listeners ────────────────────────────────────────────────────────
-document.addEventListener('input', e => {
-    const watched = ['program','standards','material','abbr-check','page','format','delivery','audience','evidence','url','directions','unit','lesson','task'];
-    if (watched.includes(e.target.id)) updatePreview();
-    if (['search-input','filter-program','filter-tag'].includes(e.target.id)) renderLibrary();
-    if (['filter-program','filter-tag'].includes(e.target.id)) renderLibrary();
-});
+// ── Helpers ───────────────────────────────────────────────────────────────
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 
+// ── Events ────────────────────────────────────────────────────────────────
+document.addEventListener('input', e => {
+    if (['program','standards','material','page','format','delivery','audience','evidence','url','directions','unit','lesson','task'].includes(e.target.id)) updatePreview();
+    if (['search-input'].includes(e.target.id)) renderLibrary();
+});
 document.addEventListener('change', e => {
-    if (['filter-program','filter-tag'].includes(e.target.id)) renderLibrary();
-    if (e.target.id === 'abbr-check') updatePreview();
+    if (['abbr-check','filter-program','filter-tag'].includes(e.target.id)) { updatePreview(); renderLibrary(); }
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────
