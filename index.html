@@ -326,6 +326,49 @@
         }
         .toast.show { display: flex; }
         @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* ── Tabs ── */
+        .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1.5px solid #e2e8f0; }
+        .tab-btn {
+            background: none; border: none; padding: 10px 18px;
+            font-family: inherit; font-size: 12px; font-weight: 800;
+            color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;
+            cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .tab-btn:hover { color: #475569; }
+        .tab-btn.active { color: #1e3a8a; border-bottom-color: #1e3a8a; }
+        .tab-panel[hidden] { display: none; }
+        /* ── Reference tab ── */
+        .ref-lead { font-size: 14px; color: #334155; line-height: 1.7; margin-bottom: 14px; }
+        .ref-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #334155; line-height: 1.6; }
+        .ref-steps code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: ui-monospace, Menlo, monospace; color: #1e3a8a; }
+        .ref-subhead { font-size: 11px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+        .ref-note { font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 14px; }
+        .def-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 600px) { .def-grid { grid-template-columns: 1fr; } }
+        .def-card { border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #fafbfc; }
+        .def-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .def-card p { font-size: 12.5px; color: #475569; line-height: 1.6; }
+        .def-badge { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 999px; }
+        .def-badge-amber { background: #fef3c7; color: #92400e; }
+        .def-badge-blue { background: #dbeafe; color: #1e40af; }
+        .hier-list { display: flex; flex-direction: column; gap: 8px; }
+        .hier-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; flex-wrap: wrap; }
+        .hier-prog { font-size: 13px; font-weight: 800; color: #0f172a; }
+        .hier-levels { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .hier-level { font-size: 11px; font-weight: 700; color: #1e40af; background: #dbeafe; padding: 3px 10px; border-radius: 6px; }
+        .hier-arrow { color: #94a3b8; font-weight: 700; font-size: 12px; }
+        .mat-table-wrap { overflow-x: auto; }
+        .mat-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .mat-table th { text-align: left; font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 10px; border-bottom: 1.5px solid #e2e8f0; white-space: nowrap; }
+        .mat-table td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; color: #334155; }
+        .mat-table tr:last-child td { border-bottom: none; }
+        .mat-key { font-family: ui-monospace, Menlo, monospace; font-size: 11px; font-weight: 700; color: #1e3a8a; background: #eff3fb; padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+        .mat-name { font-weight: 700; color: #0f172a; }
+        .mat-desc { color: #64748b; font-size: 12px; }
+        .mat-fmt { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+        .mat-fmt-print { background: #f1f5f9; color: #475569; }
+        .mat-fmt-digital { background: #dbeafe; color: #1e40af; }
         /* ── Combobox (free-text + clickable suggestions) ── */
         .combo { position: relative; }
         .combo-menu {
@@ -384,6 +427,14 @@
             <div class="counter-label">Saved</div>
         </div>
     </header>
+
+    <!-- Tab navigation -->
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="builder" onclick="switchTab('builder')">Builder</button>
+        <button class="tab-btn" data-tab="reference" onclick="switchTab('reference')">Reference Guide</button>
+    </nav>
+
+    <div id="tab-builder" class="tab-panel">
     <!-- Builder Card -->
     <div class="card">
         <div class="card-header">
@@ -539,6 +590,81 @@
             </button>
         </div>
     </div>
+    </div><!-- /tab-builder -->
+
+    <!-- Reference Guide Tab -->
+    <div id="tab-reference" class="tab-panel" hidden>
+
+        <!-- About / how to use -->
+        <div class="card">
+            <div class="card-header"><span class="card-header-title">About This Tool</span></div>
+            <div class="card-body">
+                <p class="ref-lead">The EPS Citation Generator builds standardized curriculum-alignment citations for proposals, RFP evidence tables, and compliance documentation. Assemble each citation field by field, save it to your library, then tag, search, copy, or export to CSV.</p>
+                <ol class="ref-steps">
+                    <li><strong>Select an EPS Program.</strong> The Unit / Lesson / Task fields automatically relabel to match that program's structure.</li>
+                    <li><strong>Choose a Material Type.</strong> Toggle <em>Abbreviate</em> to use the short key (e.g., <code>TE</code>) instead of the full name.</li>
+                    <li><strong>Add the details</strong> — standards code, page number(s), format, delivery method, audience, evidence type, and location notes.</li>
+                    <li><strong>Review the Live Preview,</strong> add optional tags, and <strong>Save Citation.</strong></li>
+                    <li><strong>Manage your library</strong> on the Builder tab — search, filter, tag, copy, or export to CSV.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Field definitions -->
+        <div class="card">
+            <div class="card-header"><span class="card-header-title">Field Definitions</span></div>
+            <div class="card-body">
+                <div class="ref-subhead">Audience</div>
+                <div class="def-grid">
+                    <div class="def-card">
+                        <div class="def-title">Teacher</div>
+                        <p>Artifacts designed for the educator to facilitate or guide instruction — e.g., explicit scripts, instructional rationales, modeling guides, lesson overviews, and progress-monitoring forms.</p>
+                    </div>
+                    <div class="def-card">
+                        <div class="def-title">Student</div>
+                        <p>Artifacts designed for student interaction where the student is the primary actor — e.g., workbooks, student text, digital activities, and worksheets.</p>
+                    </div>
+                </div>
+                <div class="ref-subhead" style="margin-top:22px">Evidence Type</div>
+                <div class="def-grid">
+                    <div class="def-card">
+                        <div class="def-title">Narrative <span class="def-badge def-badge-amber">Input</span></div>
+                        <p>Represents the <strong>"Input"</strong> phase of learning — the opportunity for the teacher to teach the concept, or for the student to initially learn or read about it.</p>
+                    </div>
+                    <div class="def-card">
+                        <div class="def-title">Activity <span class="def-badge def-badge-blue">Output / Application</span></div>
+                        <p>Represents the <strong>"Output" / "Application"</strong> phase — the student actively practices, demonstrates, or applies the skill.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Program hierarchy -->
+        <div class="card">
+            <div class="card-header"><span class="card-header-title">Program Hierarchy</span></div>
+            <div class="card-body">
+                <p class="ref-note">Selecting a program in the Builder relabels the three alignment fields to match this structure. Programs with only two levels (e.g., SPIRE Foundations) hide the unused field.</p>
+                <div id="ref-hierarchy" class="hier-list"></div>
+            </div>
+        </div>
+
+        <!-- Material types -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-header-title">Material Types</span>
+                <span class="card-header-title" id="ref-mat-count" style="color:#94a3b8"></span>
+            </div>
+            <div class="card-body" style="padding-top:10px">
+                <div class="mat-table-wrap">
+                    <table class="mat-table">
+                        <thead><tr><th>Key</th><th>Material</th><th>Description</th><th>Format</th></tr></thead>
+                        <tbody id="ref-materials"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /tab-reference -->
 </div><!-- /page -->
 <!-- Bulk Tag Modal -->
 <div class="modal-backdrop" id="tag-modal">
@@ -579,23 +705,38 @@ const DEFAULT_FIELD_LABELS = { unit: 'Unit', lesson: 'Lesson', task: 'Task' };
 const FIELD_KEYS = ['unit', 'lesson', 'task'];
 
 const MATERIALS = [
-    { key: 'TE', name: 'Teacher Edition / Guide' }, { key: 'SE', name: 'Student Edition / Book' },
-    { key: 'SWB', name: 'Student Workbook' }, { key: 'BLM', name: 'Blackline Master' },
-    { key: 'TR', name: 'Teacher Resource' }, { key: 'SR', name: 'Student Resource' },
-    { key: 'DR', name: 'Decodable Reader' }, { key: 'RAC', name: 'Read-Aloud Cards' },
-    { key: 'WL', name: 'Word List' }, { key: 'EX', name: 'Exercise / Practice Sheet(s)' },
-    { key: 'GC', name: 'Game Cards' }, { key: 'LC', name: 'Letter Cards' },
-    { key: 'WC', name: 'Word Cards' }, { key: 'HWC', name: 'High-Frequency / Heart Word Cards' },
-    { key: 'PFC', name: 'Phonogram Flash Cards' }, { key: 'KWS', name: 'Key Word / Concept Sheet' },
-    { key: 'MC', name: 'Manipulative Cards / Tiles' }, { key: 'SMK', name: 'Student Manipulatives Kit' },
-    { key: 'PT', name: 'Placement Test' }, { key: 'ASMT', name: 'Assessment' },
-    { key: 'FP', name: 'Fluency Practice / Drill Sheet(s)' }, { key: 'RP', name: 'Reading Passage(s)' },
-    { key: 'UR', name: 'Unit Resource' }, { key: 'DTE', name: 'Digital Teacher Edition' },
-    { key: 'DSE', name: 'Digital Student Edition' }, { key: 'DSWB', name: 'Digital Student Workbook' },
-    { key: 'DTR', name: 'Digital Teacher Resource' }, { key: 'DSR', name: 'Digital Student Resource' },
-    { key: 'DA', name: 'Digital Activity' }, { key: 'DASMT', name: 'Digital Assessment' },
-    { key: 'DASH', name: 'Dashboard / Analytics' }, { key: 'DG', name: 'Digital Game / Interactive Tool' },
-    { key: 'DMR', name: 'Digital Manipulative Resource' }, { key: 'DFP', name: 'Digital Fluency Practice' }
+    { key: 'TE',    name: 'Teacher Edition / Guide',           desc: 'Lesson plans, routines, scripting',                                 format: 'Print' },
+    { key: 'SE',    name: 'Student Edition / Book',            desc: 'Core student-facing instructional content',                         format: 'Print' },
+    { key: 'SWB',   name: 'Student Workbook',                  desc: 'Practice, encoding, written responses',                             format: 'Print' },
+    { key: 'BLM',   name: 'Blackline Master',                  desc: 'Reproducible teacher/student materials',                            format: 'Print' },
+    { key: 'PTR',   name: 'Print Teacher Resource',            desc: 'Supplemental teacher materials',                                    format: 'Print' },
+    { key: 'PSR',   name: 'Print Student Resource',            desc: 'Handouts, worksheets, reference sheets',                            format: 'Print' },
+    { key: 'DR',    name: 'Decodable Reader(s)',               desc: 'Controlled text aligned to phonics skills',                         format: 'Print' },
+    { key: 'RAC',   name: 'Read-Aloud Cards',                 desc: 'Teacher-led comprehension and vocabulary resource',                 format: 'Print' },
+    { key: 'WL',    name: 'Word List',                         desc: 'Megawords structured word list content',                            format: 'Print' },
+    { key: 'EX',    name: 'Exercise / Practice Sheet(s)',      desc: 'Megawords / VCR student practice tasks',                            format: 'Print' },
+    { key: 'IGC',   name: 'Instructional Game Cards',          desc: 'Phonics / vocabulary games',                                        format: 'Print' },
+    { key: 'L/WC',  name: 'Letter / Word Cards',               desc: 'Alphabet and phoneme aids; word recognition and decoding practice', format: 'Print' },
+    { key: 'HWC',   name: 'High-Frequency / Heart Word Cards', desc: 'Evidence-based high-frequency word practice',                       format: 'Print' },
+    { key: 'PFC',   name: 'Phonogram Flash Cards',            desc: 'Sound-symbol correspondence',                                       format: 'Print' },
+    { key: 'KWS',   name: 'Key Word / Concept Sheet',         desc: 'Introduces phonics concept',                                        format: 'Print' },
+    { key: 'MB/T',  name: 'Manipulative Boards / Tiles',      desc: 'Segmentation boards, tiles',                                        format: 'Print' },
+    { key: 'SMK',   name: 'Student Manipulatives Kit',        desc: 'Hands-on materials set',                                            format: 'Print' },
+    { key: 'SPT',   name: 'Student Placement Test',           desc: 'Initial student placement',                                         format: 'Print' },
+    { key: 'ASMT',  name: 'Student Assessment(s)',            desc: 'Formative or summative evaluation tools',                           format: 'Print' },
+    { key: 'FPDS',  name: 'Fluency Practice / Drill Sheet(s)',desc: 'Fluency development resources',                                      format: 'Print' },
+    { key: 'SRP',   name: 'Student Reading Passage(s)',       desc: 'Decodable or comprehension-aligned reading text',                   format: 'Print' },
+    { key: 'DTE',   name: 'Digital Teacher Edition',          desc: 'Interactive Teacher Edition',                                       format: 'Digital' },
+    { key: 'DSE',   name: 'Digital Student Edition',          desc: 'Digital teacher guides; lesson plans, routines, scripting',         format: 'Digital' },
+    { key: 'DSWB',  name: 'Digital Student Workbook',         desc: 'Core student-facing digital instructional content',                 format: 'Digital' },
+    { key: 'DTR',   name: 'Digital Teacher Resource',         desc: 'Lesson guides, reports',                                            format: 'Digital' },
+    { key: 'DSR',   name: 'Digital Student Resource',         desc: 'Practice activities',                                               format: 'Digital' },
+    { key: 'DSA',   name: 'Digital Student Activity',         desc: 'Interactive practice tasks',                                        format: 'Digital' },
+    { key: 'DASMT', name: 'Digital Assessment',               desc: 'Placement test, benchmarking, oral reading fluency',                format: 'Digital' },
+    { key: 'DASH',  name: 'Dashboard / Analytics',            desc: 'Progress monitoring, reporting',                                    format: 'Digital' },
+    { key: 'DGT',   name: 'Digital Game / Interactive Tool',  desc: '',                                                                  format: 'Digital' },
+    { key: 'DMR',   name: 'Digital Manipulative Resource',    desc: 'Virtual cards / tiles',                                             format: 'Digital' },
+    { key: 'DFP',   name: 'Digital Fluency Practice',         desc: 'Oral reading tracking',                                             format: 'Digital' }
 ];
 
 // ── Example citations (loaded on demand via the "Load Examples" button) ─────
@@ -606,10 +747,19 @@ const EXAMPLE_CITATIONS = [
     { program: 'SPIRE Foundations: Sounds Sensible',  text: "RF.K.2, SPIRE Foundations: Sounds Sensible, Teacher Edition / Guide, Lesson: 18, Step: 4, p. 23, Print, Whole Group, Teacher, Narrative" },
     { program: 'Megawords',                           text: "RF.4.3, Megawords, Student Edition / Book, Book: 3, Word List: 7, Exercise: 2, pp. 14–15, Print, Independent Practice, Student, Activity" },
     { program: 'Wordly Wise',                         text: "L.5.4, Wordly Wise, Student Edition / Book, Book: 5, Lesson: 8, Activity: 4B, pp. 56–58, Digital, Independent Practice, Student, Activity" },
-    { program: 'SPIRE Decodable Readers',             text: "RF.1.4, SPIRE Decodable Readers, Decodable Reader, Level: 2, Set: A, Reader: Pip's Trip, p. 6, Print, Small Group, Student, Narrative" },
+    { program: 'SPIRE Decodable Readers',             text: "RF.1.4, SPIRE Decodable Readers, Decodable Reader(s), Level: 2, Set: A, Reader: Pip's Trip, p. 6, Print, Small Group, Student, Narrative" },
     { program: 'Vocabulary from Classical Roots',     text: "L.7.4b, Vocabulary from Classical Roots, Student Edition / Book, Book: B, Lesson: 5, Activity/Exercise: C, pp. 33–34, Print, Whole Group, Student, Activity" },
-    { program: 'Reading Accelerator',                 text: "RI.4.1, Reading Accelerator, Digital Activity, Skill: 7, Lesson: 2, Activity: Comprehension Check, Digital, Independent Practice, Student, Activity, Located under the 'Practice' tab. See: (https://epsconnect.epslearning.com)" }
+    { program: 'Reading Accelerator',                 text: "RI.4.1, Reading Accelerator, Digital Student Activity, Skill: 7, Lesson: 2, Activity: Comprehension Check, Digital, Independent Practice, Student, Activity, Located under the 'Practice' tab. See: (https://epsconnect.epslearning.com)" }
 ];
+
+// Identify seeded examples so they can be cleared without ever touching user citations.
+// User-saved citations are flagged isExample:false and are therefore never removed.
+const EXAMPLE_TEXTS = new Set(EXAMPLE_CITATIONS.map(e => e.text));
+function isExampleCitation(c) {
+    if (c.isExample === true)  return true;
+    if (c.isExample === false) return false;
+    return EXAMPLE_TEXTS.has(c.text);   // legacy seeded entries (saved before the flag existed)
+}
 
 // ── State ─────────────────────────────────────────────────────────────────
 let citations = [];
@@ -657,7 +807,7 @@ function maybeSeedExamples() {
             citations = EXAMPLE_CITATIONS.map((ex, i) => ({
                 id: (Date.now() + i).toString(),
                 text: ex.text, program: ex.program,
-                tags: ['Example'], createdAt: Date.now() + i
+                tags: ['Example'], isExample: true, createdAt: Date.now() + i
             }));
             localStorage.setItem('eps_examples_seeded', '1');
             saveToStorage();
@@ -827,9 +977,21 @@ document.getElementById('tag-input').addEventListener('keydown', e => { if (e.ke
 function handleSave() {
     const text = buildCitationText().trim();
     if (!text) return;
-    citations = [{ id: Date.now().toString(), text, program: document.getElementById('program').value || 'Manual', tags: [...formTags], createdAt: Date.now() }, ...citations];
+    const entry = {
+        id: Date.now().toString(),
+        text,
+        program: document.getElementById('program').value || 'Manual',
+        tags: [...formTags],
+        isExample: false,                    // user content — never auto-cleared
+        createdAt: Date.now()
+    };
+    // Clear the seeded examples the moment the user saves real content. Only
+    // example items are dropped; every user-saved citation is preserved.
+    const userCitations = citations.filter(c => !isExampleCitation(c));
+    const clearedExamples = citations.length - userCitations.length;
+    citations = [entry, ...userCitations];
     saveToStorage();
-    showToast('Citation saved');
+    showToast(clearedExamples ? 'Citation saved — examples cleared' : 'Citation saved');
     renderAll();
 }
 
@@ -861,10 +1023,11 @@ function loadExamples() {
             text: ex.text,
             program: ex.program,
             tags: ['Example'],
+            isExample: true,
             createdAt: Date.now() + i
         }));
     if (!toAdd.length) { showToast('Examples already loaded'); return; }
-    citations = [...toAdd, ...citations];
+    citations = [...toAdd, ...citations];   // prepends only — never overwrites user citations
     saveToStorage();
     renderAll();
     showToast(`Added ${toAdd.length} example${toAdd.length !== 1 ? 's' : ''}`);
@@ -982,6 +1145,41 @@ function exportCSV() {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `eps-citations-${new Date().toISOString().slice(0,10)}.csv`; a.click();
 }
 
+// ── Tabs & Reference Guide ──────────────────────────────────────────────────
+function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => { p.hidden = (p.id !== 'tab-' + name); });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderReference() {
+    // Program hierarchy — built from the same PROGRAMS registry the Builder uses.
+    const hier = document.getElementById('ref-hierarchy');
+    if (hier) {
+        hier.innerHTML = PROGRAMS.map(p => {
+            const levels = FIELD_KEYS.map(k => p[k]).filter(Boolean);
+            return `<div class="hier-row">
+                <div class="hier-prog">${escHtml(p.program)}</div>
+                <div class="hier-levels">${levels.map((l, i) =>
+                    `<span class="hier-level">${escHtml(l)}</span>${i < levels.length - 1 ? '<span class="hier-arrow">&rarr;</span>' : ''}`
+                ).join('')}</div>
+            </div>`;
+        }).join('');
+    }
+    // Material types table — built from the MATERIALS registry.
+    const body = document.getElementById('ref-materials');
+    if (body) {
+        body.innerHTML = MATERIALS.map(m => `<tr>
+            <td><span class="mat-key">${escHtml(m.key)}</span></td>
+            <td class="mat-name">${escHtml(m.name)}</td>
+            <td class="mat-desc">${escHtml(m.desc || '—')}</td>
+            <td><span class="mat-fmt mat-fmt-${(m.format || '').toLowerCase()}">${escHtml(m.format || '')}</span></td>
+        </tr>`).join('');
+    }
+    const cnt = document.getElementById('ref-mat-count');
+    if (cnt) cnt.textContent = `${MATERIALS.length} types`;
+}
+
 // ── Toast ─────────────────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg) {
@@ -1007,7 +1205,8 @@ document.addEventListener('change', e => {
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 loadFromStorage();
-updatePreview();   // render the default Unit / Lesson / Task fields immediately on load
+updatePreview();    // render the default Unit / Lesson / Task fields immediately on load
+renderReference();  // populate the Reference Guide tab (program hierarchy + materials table)
 </script>
 </body>
 </html>
