@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f8fafc;
@@ -17,7 +16,6 @@
             font-size: 14px;
             line-height: 1.5;
         }
-
         /* ── Layout ── */
         .banner {
             background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
@@ -32,7 +30,6 @@
             letter-spacing: 0.01em;
         }
         .page { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
-
         /* ── Card ── */
         .card {
             background: white;
@@ -56,7 +53,6 @@
             letter-spacing: 0.12em;
         }
         .card-body { padding: 24px; }
-
         /* ── Grid ── */
         .form-grid {
             display: grid;
@@ -68,7 +64,6 @@
             .form-grid { grid-template-columns: 1fr; }
             .col-span-2 { grid-column: span 1; }
         }
-
         /* ── Form Elements ── */
         .field { display: flex; flex-direction: column; gap: 5px; }
         .label {
@@ -83,7 +78,6 @@
         }
         .label-note { font-weight: 400; color: #94a3b8; text-transform: none; letter-spacing: 0; font-size: 10px; }
         .label-row { display: flex; align-items: center; justify-content: space-between; }
-
         input[type="text"], input:not([type="checkbox"]):not([type="radio"]), select, textarea {
             width: 100%;
             height: 38px;
@@ -117,7 +111,6 @@
             box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
         }
         input::placeholder, textarea::placeholder { color: #cbd5e1; }
-
         /* Abbreviate checkbox row */
         .abbr-row {
             display: flex;
@@ -138,7 +131,6 @@
             cursor: pointer;
             flex-shrink: 0;
         }
-
         /* ── Preview ── */
         .preview-box {
             background: #0f172a;
@@ -161,7 +153,6 @@
             line-height: 1.7;
         }
         .preview-text.empty { color: #475569; }
-
         /* ── Buttons ── */
         .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
         .btn {
@@ -197,7 +188,6 @@
             padding: 0; transition: color 0.15s;
         }
         .btn-link:hover { color: #ef4444; }
-
         /* ── Tags section ── */
         .tags-section {
             margin-top: 20px;
@@ -228,7 +218,6 @@
             margin-left: 2px; font-weight: 400;
         }
         .chip-remove:hover { opacity: 1; }
-
         /* ── Library header ── */
         .lib-header { padding: 16px 24px; border-bottom: 1px solid #f1f5f9; }
         .lib-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -237,7 +226,6 @@
         .filter-row .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
         .filter-row .search-wrap input { padding-left: 32px; }
         .filter-row select { width: auto; flex-shrink: 0; font-size: 12px; }
-
         /* ── Citation cards ── */
         .citation-card {
             padding: 16px 24px;
@@ -270,7 +258,6 @@
             flex-shrink: 0;
         }
         .copy-btn:hover { background: #f1f5f9; color: #475569; }
-
         /* ── Library footer ── */
         .lib-footer {
             padding: 12px 24px;
@@ -282,10 +269,8 @@
             flex-wrap: wrap;
         }
         .lib-footer-spacer { flex: 1; }
-
         /* ── Empty state ── */
         .empty-state { padding: 48px 24px; text-align: center; color: #94a3b8; font-size: 13px; }
-
         /* ── Header ── */
         .page-header { margin-bottom: 28px; display: flex; align-items: flex-start; justify-content: space-between; }
         .page-header-left p.eyebrow { font-size: 10px; font-weight: 900; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 4px; }
@@ -294,12 +279,10 @@
         .counter-block { text-align: right; }
         .counter-num { font-size: 32px; font-weight: 900; color: #1e3a8a; line-height: 1; }
         .counter-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; }
-
         /* ── Char count ── */
         .char-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 5px; }
         .char-count { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; }
         .char-count.warn { color: #dc2626; }
-
         /* ── Modal ── */
         .modal-backdrop {
             display: none;
@@ -323,7 +306,6 @@
         .modal h3 { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
         .modal p { font-size: 12px; color: #64748b; margin-bottom: 16px; }
         .modal .btn-row { margin-top: 0; }
-
         /* ── Toast ── */
         .toast {
             display: none;
@@ -343,7 +325,39 @@
         }
         .toast.show { display: flex; }
         @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
+        /* ── Combobox (free-text + clickable suggestions) ── */
+        .combo { position: relative; }
+        .combo-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0; right: 0;
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+            z-index: 30;
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        .combo-menu.open { display: block; }
+        .combo-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #0f172a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .combo-item:hover { background: #f1f5f9; }
+        .combo-hint {
+            font-size: 10px; font-weight: 800; color: #94a3b8;
+            letter-spacing: 0.05em; flex-shrink: 0;
+        }
         /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -351,15 +365,12 @@
     </style>
 </head>
 <body>
-
 <!-- Banner -->
 <div id="storage-banner" class="banner">
     <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke-width="2.5"/><path stroke-width="2" d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.3-6.7-2.1 2.1M8.4 15.6l-2.1 2.1m0-11.4 2.1 2.1m7.2 7.2 2.1 2.1"/></svg>
     <span id="storage-status">Connecting to persistent storage...</span>
 </div>
-
 <div class="page">
-
     <!-- Header -->
     <header class="page-header">
         <div class="page-header-left">
@@ -372,7 +383,6 @@
             <div class="counter-label">Saved</div>
         </div>
     </header>
-
     <!-- Builder Card -->
     <div class="card">
         <div class="card-header">
@@ -381,20 +391,19 @@
         </div>
         <div class="card-body">
             <div class="form-grid">
-
                 <!-- Program -->
                 <div class="field col-span-2">
                     <label class="label">EPS Program Name</label>
-                    <input id="program" list="program-list" placeholder="Start typing or select a program...">
-                    <datalist id="program-list"></datalist>
+                    <div class="combo" id="program-combo">
+                        <input id="program" autocomplete="off" placeholder="Start typing or select a program...">
+                        <div class="combo-menu" id="program-menu"></div>
+                    </div>
                 </div>
-
                 <!-- Standards -->
                 <div class="field">
                     <label class="label">Standards Code <span class="label-note">(optional)</span></label>
                     <input id="standards" placeholder="e.g., RI.4.1, RF.2.3b">
                 </div>
-
                 <!-- Material Type -->
                 <div class="field">
                     <div class="label-row">
@@ -403,19 +412,18 @@
                             <input type="checkbox" id="abbr-check"> Abbreviate
                         </label>
                     </div>
-                    <input id="material" list="material-list" placeholder="Select or type material...">
-                    <datalist id="material-list"></datalist>
+                    <div class="combo" id="material-combo">
+                        <input id="material" autocomplete="off" placeholder="Select or type material...">
+                        <div class="combo-menu" id="material-menu"></div>
+                    </div>
                 </div>
-
                 <!-- Dynamic fields injected here -->
-                <div id="dynamic-fields"></div>
-
+                <div id="dynamic-fields" style="display:contents"></div>
                 <!-- Page Numbers -->
                 <div class="field">
                     <label class="label">Page Number(s)</label>
                     <input id="page" placeholder="e.g., 42 or 64–68">
                 </div>
-
                 <!-- Format -->
                 <div class="field">
                     <label class="label">Format <span class="label-note">(optional)</span></label>
@@ -424,7 +432,6 @@
                         <option>Digital</option><option>Print</option><option>Hybrid</option>
                     </select>
                 </div>
-
                 <!-- Delivery -->
                 <div class="field">
                     <label class="label">Delivery Method <span class="label-note">(optional)</span></label>
@@ -434,7 +441,6 @@
                         <option>Direct Instruction</option><option>Independent Practice</option>
                     </select>
                 </div>
-
                 <!-- Audience -->
                 <div class="field">
                     <label class="label">Audience</label>
@@ -443,7 +449,6 @@
                         <option>Teacher</option><option>Student</option>
                     </select>
                 </div>
-
                 <!-- Evidence Type -->
                 <div class="field">
                     <label class="label">Evidence Type</label>
@@ -452,13 +457,11 @@
                         <option>Narrative</option><option>Activity</option>
                     </select>
                 </div>
-
                 <!-- URL -->
                 <div class="field col-span-2">
                     <label class="label">Evidence Web Link <span class="label-note">(optional)</span></label>
                     <input id="url" placeholder="https://...">
                 </div>
-
                 <!-- Directions -->
                 <div class="field col-span-2">
                     <div class="char-row">
@@ -467,15 +470,12 @@
                     </div>
                     <textarea id="directions" maxlength="300" placeholder="Short directions to locate cited evidence, where to look in the material, and/or cross-reference to other material type..."></textarea>
                 </div>
-
             </div><!-- /form-grid -->
-
             <!-- Live Preview -->
             <div class="preview-box">
                 <div class="preview-label">Live Preview</div>
                 <p id="preview-text" class="preview-text empty">Citation will appear here as you fill in fields above...</p>
             </div>
-
             <!-- Action Buttons -->
             <div class="btn-row">
                 <button class="btn btn-ghost" onclick="handleCopy()">
@@ -487,7 +487,6 @@
                     Save Citation
                 </button>
             </div>
-
             <!-- Tags — below actions, applied on save -->
             <div class="tags-section">
                 <label class="label">Tags <span class="label-note">(applied when saved)</span></label>
@@ -497,10 +496,8 @@
                     <button class="btn btn-amber btn-sm" onclick="addFormTag()">+ Add Tag</button>
                 </div>
             </div>
-
         </div><!-- /card-body -->
     </div><!-- /card -->
-
     <!-- Library Card -->
     <div class="card">
         <div class="lib-header">
@@ -520,9 +517,7 @@
                 </select>
             </div>
         </div>
-
         <div id="citation-list"></div>
-
         <div class="lib-footer" id="lib-footer" style="display:none">
             <button class="btn btn-ghost btn-sm" onclick="selectAll()">Select All</button>
             <button class="btn btn-ghost btn-sm" onclick="deselectAll()">Deselect</button>
@@ -539,9 +534,7 @@
             </button>
         </div>
     </div>
-
 </div><!-- /page -->
-
 <!-- Bulk Tag Modal -->
 <div class="modal-backdrop" id="tag-modal">
     <div class="modal">
@@ -556,13 +549,11 @@
         </div>
     </div>
 </div>
-
 <!-- Toast -->
 <div class="toast" id="toast">
     <svg width="13" height="13" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
     <span id="toast-msg"></span>
 </div>
-
 <script>
 // ── Registry ──────────────────────────────────────────────────────────────
 const PROGRAMS = [
@@ -577,6 +568,10 @@ const PROGRAMS = [
     { program: 'Readfetti', unit: 'Skill Group', lesson: 'Book', task: 'Focus' },
     { program: 'Vocabulary from Classical Roots', unit: 'Book', lesson: 'Lesson', task: 'Activity/Exercise' }
 ];
+
+// Default labels shown on load and whenever the program is empty or not a quick-fill match.
+const DEFAULT_FIELD_LABELS = { unit: 'Unit', lesson: 'Lesson', task: 'Task' };
+const FIELD_KEYS = ['unit', 'lesson', 'task'];
 
 const MATERIALS = [
     { key: 'TE', name: 'Teacher Edition / Guide' }, { key: 'SE', name: 'Student Edition / Book' },
@@ -602,6 +597,7 @@ const MATERIALS = [
 let citations = [];
 let formTags  = [];
 let selectedIds = new Set();
+let renderedFieldSig = null;   // Signature of the currently-rendered dynamic fields
 const STORAGE_KEY = 'eps_citations_v2';
 
 // ── Storage ────────────────────────────────────────────────────────────────
@@ -641,15 +637,60 @@ async function saveToStorage() {
 
 function setStatus(msg) { document.getElementById('storage-status').textContent = msg; }
 
-// ── Init datalists ────────────────────────────────────────────────────────
-PROGRAMS.forEach(p => document.getElementById('program-list').innerHTML += `<option value="${p.program}">`);
-MATERIALS.forEach(m => document.getElementById('material-list').innerHTML += `<option value="${m.name}">`);
-
-// ── Citation builder ───────────────────────────────────────────────────────
-function getProgramMeta() {
-    return PROGRAMS.find(p => p.program === document.getElementById('program').value) || {};
+// ── Combobox (free-text input with a clickable suggestion menu) ──────────────
+// Replaces native <datalist>, whose popup does not render reliably in embedded
+// preview/webview environments. This always shows matching options on focus and
+// while typing, and still allows fully manual entry.
+function setupCombo(inputId, menuId, options) {
+    const input = document.getElementById(inputId);
+    const menu  = document.getElementById(menuId);
+    function render() {
+        const f = (input.value || '').toLowerCase();
+        const matches = options.filter(o =>
+            o.label.toLowerCase().includes(f) ||
+            (o.value || '').toLowerCase().includes(f) ||
+            (o.hint  || '').toLowerCase().includes(f)
+        );
+        if (!matches.length) { menu.classList.remove('open'); return; }
+        menu.innerHTML = matches.map(o =>
+            `<div class="combo-item" data-value="${escHtml(o.value)}">${escHtml(o.label)}${o.hint ? `<span class="combo-hint">${escHtml(o.hint)}</span>` : ''}</div>`
+        ).join('');
+        menu.classList.add('open');
+    }
+    input.addEventListener('focus', render);
+    input.addEventListener('input', render);
+    // Delay close so a click on a menu item registers first.
+    input.addEventListener('blur', () => setTimeout(() => menu.classList.remove('open'), 150));
+    menu.addEventListener('mousedown', e => {
+        const item = e.target.closest('.combo-item');
+        if (!item) return;
+        e.preventDefault();                                  // keep focus, avoid blur race
+        input.value = item.getAttribute('data-value');
+        menu.classList.remove('open');
+        input.dispatchEvent(new Event('input', { bubbles: true }));   // refresh preview + dynamic fields
+    });
 }
 
+setupCombo('program',  'program-menu',  PROGRAMS.map(p => ({ value: p.program, label: p.program })));
+setupCombo('material', 'material-menu', MATERIALS.map(m => ({ value: m.name, label: m.name, hint: m.key })));
+
+// ── Field-label resolution ──────────────────────────────────────────────────
+// Returns the label map for the current program value.
+//  • Known quick-fill program → its registry labels (a field it doesn't define is hidden,
+//    e.g. SPIRE Foundations has no "lesson", so only two fields show).
+//  • Empty OR manual / non-matching entry → default Unit / Lesson / Task (all three show).
+function getFieldLabels() {
+    const progVal = (document.getElementById('program').value || '').trim();
+    const meta = PROGRAMS.find(p => p.program === progVal);
+    if (meta) {
+        const labels = {};
+        FIELD_KEYS.forEach(k => { if (meta[k]) labels[k] = meta[k]; });
+        return labels;
+    }
+    return { ...DEFAULT_FIELD_LABELS };   // always visible by default
+}
+
+// ── Citation builder ───────────────────────────────────────────────────────
 function getMaterialDisplay() {
     const val = document.getElementById('material').value;
     const abbr = document.getElementById('abbr-check').checked;
@@ -664,13 +705,13 @@ function formatPage(val) {
 }
 
 function buildCitationText() {
-    const prog = getProgramMeta();
+    const labels = getFieldLabels();
     const v = id => document.getElementById(id)?.value || '';
     const parts = [
         v('standards'), v('program'), getMaterialDisplay(),
-        v('unit')   ? `${prog.unit}: ${v('unit')}`     : null,
-        v('lesson') ? `${prog.lesson}: ${v('lesson')}` : null,
-        v('task')   ? `${prog.task}: ${v('task')}`     : null,
+        v('unit')   ? `${labels.unit   || DEFAULT_FIELD_LABELS.unit}: ${v('unit')}`     : null,
+        v('lesson') ? `${labels.lesson || DEFAULT_FIELD_LABELS.lesson}: ${v('lesson')}` : null,
+        v('task')   ? `${labels.task   || DEFAULT_FIELD_LABELS.task}: ${v('task')}`     : null,
         formatPage(v('page')),
         v('format'), v('delivery'), v('audience'), v('evidence'), v('directions')
     ].filter(Boolean);
@@ -678,23 +719,38 @@ function buildCitationText() {
     return parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
 }
 
+// Rebuilds the Unit/Lesson/Task inputs ONLY when the set of fields/labels changes.
+// This is the key fix: rebuilding on every keystroke was wiping the input value and
+// stealing focus. A stable signature short-circuits no-op rebuilds, and any existing
+// values are carried across a genuine rebuild (program change).
 function updateDynamicFields() {
-    const prog = getProgramMeta();
+    const labels = getFieldLabels();
+    const sig = JSON.stringify(labels);
+    if (sig === renderedFieldSig) return;   // No structural change → leave the DOM (and focus) alone
+
+    // Preserve whatever the user has already typed.
+    const prev = {};
+    FIELD_KEYS.forEach(k => {
+        const el = document.getElementById(k);
+        if (el) prev[k] = el.value;
+    });
+
     const dyn = document.getElementById('dynamic-fields');
-    let html = '';
-    ['unit','lesson','task'].forEach(k => {
-        if (prog[k]) {
-            html += `<div class="field"><label class="label">${prog[k]}</label><input id="${k}" class="dynamic-input" placeholder="${prog[k]}..."></div>`;
+    dyn.innerHTML = FIELD_KEYS.map(k =>
+        labels[k]
+            ? `<div class="field"><label class="label">${escHtml(labels[k])}</label><input id="${k}" placeholder="${escHtml(labels[k])}..."></div>`
+            : ''
+    ).join('');
+
+    // Restore preserved values for any field that still exists.
+    FIELD_KEYS.forEach(k => {
+        if (labels[k] && prev[k] != null) {
+            const el = document.getElementById(k);
+            if (el) el.value = prev[k];
         }
     });
-    dyn.innerHTML = html;
-    
-    // Reattach event listeners to new dynamic fields
-    const dynamicInputs = dyn.querySelectorAll('.dynamic-input');
-    dynamicInputs.forEach(input => {
-        input.addEventListener('input', updatePreview);
-        input.addEventListener('change', updatePreview);
-    });
+
+    renderedFieldSig = sig;
 }
 
 function updatePreview() {
@@ -703,7 +759,6 @@ function updatePreview() {
     const el = document.getElementById('preview-text');
     el.textContent = text || 'Citation will appear here as you fill in fields above...';
     el.classList.toggle('empty', !text);
-
     const dir = (document.getElementById('directions').value || '').length;
     const cc = document.getElementById('char-count');
     cc.textContent = `${dir} / 300`;
@@ -755,6 +810,7 @@ function clearForm() {
     });
     document.getElementById('abbr-check').checked = false;
     document.getElementById('dynamic-fields').innerHTML = '';
+    renderedFieldSig = null;   // force a clean rebuild next time
     formTags = [];
     renderFormTags();
     updatePreview();
@@ -793,15 +849,12 @@ function renderLibrary() {
     const list     = document.getElementById('citation-list');
     const footer   = document.getElementById('lib-footer');
     const filtered = getFiltered();
-
     if (filtered.length === 0) {
         list.innerHTML = `<div class="empty-state">${citations.length === 0 ? 'No citations saved yet. Build your first one above.' : 'No citations match your current filters.'}</div>`;
         footer.style.display = 'none';
         return;
     }
-
     footer.style.display = 'flex';
-
     list.innerHTML = filtered.map(c => `
         <div class="citation-card">
             <input type="checkbox" ${selectedIds.has(c.id)?'checked':''} onchange="toggleSelect('${c.id}')">
@@ -819,7 +872,6 @@ function renderLibrary() {
             </button>
         </div>
     `).join('');
-
     const hasSel = selectedIds.size > 0;
     document.getElementById('bulk-tag-btn').style.display  = hasSel ? 'inline-flex' : 'none';
     document.getElementById('copy-sel-btn').style.display  = hasSel ? 'inline-flex' : 'none';
@@ -892,7 +944,7 @@ function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 
 // ── Events ────────────────────────────────────────────────────────────────
 document.addEventListener('input', e => {
-    if (['program','standards','material','page','format','delivery','audience','evidence','url','directions'].includes(e.target.id)) updatePreview();
+    if (['program','standards','material','page','format','delivery','audience','evidence','url','directions','unit','lesson','task'].includes(e.target.id)) updatePreview();
     if (['search-input'].includes(e.target.id)) renderLibrary();
 });
 document.addEventListener('change', e => {
@@ -901,6 +953,7 @@ document.addEventListener('change', e => {
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 loadFromStorage();
+updatePreview();   // render the default Unit / Lesson / Task fields immediately on load
 </script>
 </body>
 </html>
