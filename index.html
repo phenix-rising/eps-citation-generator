@@ -622,32 +622,61 @@
         <div class="card">
             <div class="card-header"><span class="card-header-title">Citation Structure</span></div>
             <div class="card-body">
-                <p class="ref-lead"><span class="def-badge def-badge-blue">[Standards Code]</span>, <span class="def-badge def-badge-blue">[EPS Program Name]</span>, <span class="def-badge def-badge-blue">[Material Type]</span>, <span class="def-badge def-badge-blue">[Unit]</span>, <span class="def-badge def-badge-blue">[Lesson]</span>, <span class="def-badge def-badge-blue">[Task]</span>, <span class="def-badge def-badge-blue">[Page Number(s)]</span>, <span class="def-badge def-badge-blue">[Format]</span>, <span class="def-badge def-badge-blue">[Audience]</span>, <span class="def-badge def-badge-blue">[Evidence Type]</span>, <span class="def-badge def-badge-blue">[Location Notes & Cross-References]</span>. See: (<span class="def-badge def-badge-blue">[Evidence Web Link (URL)]</span>)</br></p>
-                <div class="def-title">Field Value Explanation</div>
-					<ul class="ref-steps">
-						<li><strong>Standards Code:</strong> The Educational Standards Code this citation is related to. Field is <em>Recommended but Optional</em> for organization when generating several citations.</li>
-						<li><strong>EPS Program Name:</strong> This field is a Quick-Fill (see <code>Program</code> Hierarchy list below) and a manual program naming field. The <code>Unit</code> / <code>Lesson</code> / <code>Task</code> fields automatically relabel to match that program's structure if a quick fill is selected.</li>
-						<li><strong>Material Type:</strong> See the <code>Material Types</code> (<em>32 total types</em>) in the table towards the bottom of this page. Check the <code>Abbreviate</code> box to use the abbreviated material name (e.g., TE instead of Teacher Guide/Edition) instead of the full material name.</li></br>
-                	</ul>
-				<div class="def-title">Program Structure Hierarchy</div>
-				<p>To remove ambiguity between program structures, a standardized format was used to ensure everything is cleanly cited:</br><code><strong>Unit → Lesson → Task</strong></code></p>
-					<ul class="ref-steps">
-						<li><strong>Unit:</strong> Field automatically relabels to match the EPS Program Name structure. <code>Level</code> / <code>Skill</code> / <code>Skill Group</code> / <code>Book</code> / <code>Set</code></li>
-						<li><strong>Lesson:</strong> Field automatically relabels to match the EPS Program Name structure. <code>Lesson</code> / <code>Word List</code> / <code>Book</code> / <code>Reader</code></li>
-						<li><strong>Task:</strong> Field automatically relabels to match the EPS Program Name structure. <code>Step</code> / <code>Activity</code> / <code>Exercise</code> / <code>Read</code> / <code>Reading Task</code></li></br>
-                	</ul>
-				<div class="def-title">Field Value Explanation</div>
-                	<ul class="ref-steps">
-						<li><strong>Page Number(s):</strong> Allows for single page and multi-page input. Will add <code>p.</code> for single page, and <code>pp.</code> for multipage citations automatically.</li>
-						<li><strong>Format:</strong> If the alignment requires the material format the allows for Print, Digital, or Hybrid to be added. It is blank by default.</li>
-						<li><strong>Audience:</strong> <em>Optional field</em>, where the choices are Teacher or Student. This is related to the Evidence Type field. See table below for detailed explanation of Field Definitions.</li>
-						<li><strong>Evidence Type:</strong> <em>Optional field</em>, where the choices are Narrative or Activity. This is related to the Audience field. See table below for detailed explanation of Field Definitions.</li>
-						<li><strong>Location Notes & Cross-References:</strong> Short directions to locate cited evidence, cross-reference to other artifact type and/or a very brief narrative if necessary.</li>
-						<li><strong>Evidence Web Link (URL):</strong> Must provide a direct link to evidence of the citations alignment to the <code>Educational Standards Code</code> being cited.</li>
-                	</ul>
+
+                <!-- Citation format template -->
+                <p class="ref-lead">
+                    <span class="def-badge def-badge-blue">[Standards Code]</span>,
+                    <span class="def-badge def-badge-blue">[EPS Program Name]</span>,
+                    <span class="def-badge def-badge-blue">[Material Type]</span>,
+                    <span class="def-badge def-badge-blue">[Format]</span>,
+                    <span class="def-badge def-badge-blue">[Unit]</span>,
+                    <span class="def-badge def-badge-blue">[Lesson]</span>,
+                    <span class="def-badge def-badge-blue">[Task]</span>,
+                    <span class="def-badge def-badge-blue">[Page / Click Path]</span>,
+                    <span class="def-badge def-badge-blue">[Delivery Method]</span>,
+                    <span class="def-badge def-badge-blue">[Audience]</span>,
+                    <span class="def-badge def-badge-blue">[Evidence Type]</span>,
+                    <span class="def-badge def-badge-blue">[Location Notes &amp; Cross-References]</span>.
+                    See: (<span class="def-badge def-badge-blue">[Evidence Web Link (URL)]</span>)
+                </p>
+
+                <!-- Core fields -->
+                <div class="ref-subhead" style="margin-top:18px">Core Fields</div>
+                <ul class="ref-steps">
+                    <li><strong>Standards Code:</strong> The educational standards code this citation supports. <em>Recommended but optional</em> — useful for organizing citations across multiple standards.</li>
+                    <li><strong>EPS Program Name:</strong> Supports quick-fill from the program registry (see Program Hierarchy below) or free-text entry. Selecting a known program automatically relabels the Unit / Lesson / Task fields to match that program's structure.</li>
+                    <li><strong>Material Type:</strong> Select from 31 defined types (see Material Types table below). Toggle <em>Abbreviate</em> to use the short key (e.g., <code>TE</code>) instead of the full material name.</li>
+                    <li><strong>Format:</strong> Appears directly after Material Type in the citation. Options are <code>Print</code>, <code>Digital</code>, or <code>Hybrid</code>. Selecting <strong>Digital</strong> changes the Page field to <strong>Click Path</strong> and formats the citation accordingly (see below).</li>
+                </ul>
+
+                <!-- Program structure -->
+                <div class="ref-subhead" style="margin-top:22px">Program Structure &mdash; Unit &rarr; Lesson &rarr; Task</div>
+                <p class="ref-note">To remove ambiguity between program structures, a standardized three-level hierarchy is used. Each field relabels automatically when a known program is selected.</p>
+                <ul class="ref-steps">
+                    <li><strong>Unit</strong> &mdash; relabels to: <code>Level</code>, <code>Skill</code>, <code>Skill Group</code>, or <code>Book</code> depending on program.</li>
+                    <li><strong>Lesson</strong> &mdash; relabels to: <code>Lesson</code>, <code>Word List</code>, <code>Book</code>, or <code>Set</code> depending on program.</li>
+                    <li><strong>Task</strong> &mdash; relabels to: <code>Step</code>, <code>Activity</code>, <code>Exercise</code>, <code>Read</code>, <code>Reader</code>, or <code>Focus</code> depending on program. Programs with only two levels (e.g., SPIRE Foundations) hide the unused field.</li>
+                </ul>
+
+                <!-- Page / Click Path -->
+                <div class="ref-subhead" style="margin-top:22px">Page Number(s) vs. Click Path</div>
+                <ul class="ref-steps">
+                    <li><strong>Print / Hybrid:</strong> Enter a page number or range. Single pages are prefixed with <code>p.</code>; ranges are prefixed with <code>pp.</code> automatically (e.g., <code>p. 42</code> or <code>pp. 64&ndash;68</code>).</li>
+                    <li><strong>Digital:</strong> The field relabels to <strong>Click Path</strong>. Enter the navigation path to locate the evidence (e.g., <code>Home &gt; Programs &gt; SPIRE Up &gt; Level 5</code>). The citation renders as: <em>Once logged into [Program] follow the following click path [value]</em>.</li>
+                </ul>
+
+                <!-- Supporting fields -->
+                <div class="ref-subhead" style="margin-top:22px">Supporting Fields</div>
+                <ul class="ref-steps">
+                    <li><strong>Delivery Method:</strong> <em>Optional.</em> How the material is delivered &mdash; Whole Group, Small Group, Direct Instruction, or Independent Practice.</li>
+                    <li><strong>Audience:</strong> <em>Optional.</em> Teacher or Student. Related to Evidence Type &mdash; see Field Definitions below.</li>
+                    <li><strong>Evidence Type:</strong> <em>Optional.</em> Narrative or Activity. Related to Audience &mdash; see Field Definitions below.</li>
+                    <li><strong>Location Notes &amp; Cross-References:</strong> Short directions to locate cited evidence, a cross-reference to another artifact type, and/or a brief narrative if necessary. Limited to 300 characters.</li>
+                    <li><strong>Evidence Web Link (URL):</strong> A direct link to evidence of the citation's alignment to the standards code being cited. Renders as <code>See: (URL)</code> at the end of the citation.</li>
+                </ul>
+
             </div>
         </div>
-        
         <!-- Field definitions -->
         <div class="card">
             <div class="card-header"><span class="card-header-title">Field Definitions</span></div>
@@ -897,6 +926,29 @@ function setupCombo(inputId, menuId, options) {
 setupCombo('program',  'program-menu',  PROGRAMS.map(p => ({ value: p.program, label: p.program })));
 setupCombo('material', 'material-menu', MATERIALS.map(m => ({ value: m.name, label: m.name, hint: m.key })));
 
+// ── Page label updater ────────────────────────────────────────────────────
+// Renames the Page Number(s) label to "Click Path" when Digital is selected.
+function updatePageLabel() {
+    const format = document.getElementById('format').value;
+    const pageLabel = Array.from(document.querySelectorAll('.label')).find(l =>
+        l.nextElementSibling?.id === 'page' || l.htmlFor === 'page'
+    );
+    if (pageLabel) {
+        pageLabel.childNodes[0].textContent = format === 'Digital' ? 'Click Path' : 'Page Number(s)';
+    }
+    const pageInput = document.getElementById('page');
+    if (pageInput) {
+        pageInput.placeholder = format === 'Digital'
+            ? 'e.g., Home > Programs > SPIRE Up > Level 5'
+            : 'e.g., 42 or 64–68';
+    }
+}
+
+document.getElementById('format').addEventListener('change', () => {
+    updatePageLabel();
+    updatePreview();
+});
+
 // ── Field-label resolution ──────────────────────────────────────────────────
 // Returns the label map for the current program value.
 //  • Known quick-fill program → its registry labels (a field it doesn't define is hidden,
@@ -924,19 +976,36 @@ function getMaterialDisplay() {
 
 function formatPage(val) {
     if (!val || !val.trim()) return null;
+    const format = document.getElementById('format').value;
+    if (format === 'Digital') return val.trim();   // no p./pp. prefix for Digital
     return /[\-,\s]/.test(val.trim()) ? `pp. ${val.trim()}` : `p. ${val.trim()}`;
 }
 
 function buildCitationText() {
     const labels = getFieldLabels();
     const v = id => document.getElementById(id)?.value || '';
+    const format = v('format');
+
+    // Build the page/click-path part based on format
+    let pageOrClickPath = null;
+    const pageVal = v('page');
+    if (pageVal) {
+        if (format === 'Digital') {
+            const program = v('program');
+            pageOrClickPath = `Once logged into ${program} follow the following click path [${pageVal}]`;
+        } else {
+            pageOrClickPath = formatPage(pageVal);
+        }
+    }
+
     const parts = [
         v('standards'), v('program'), getMaterialDisplay(),
+        format,   // moved directly after material
         v('unit')   ? `${labels.unit   || DEFAULT_FIELD_LABELS.unit}: ${v('unit')}`     : null,
         v('lesson') ? `${labels.lesson || DEFAULT_FIELD_LABELS.lesson}: ${v('lesson')}` : null,
         v('task')   ? `${labels.task   || DEFAULT_FIELD_LABELS.task}: ${v('task')}`     : null,
-        formatPage(v('page')),
-        v('format'), v('delivery'), v('audience'), v('evidence'), v('directions')
+        pageOrClickPath,
+        v('delivery'), v('audience'), v('evidence'), v('directions')
     ].filter(Boolean);
     const url = v('url');
     return parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
