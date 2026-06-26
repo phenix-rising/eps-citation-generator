@@ -408,7 +408,7 @@
                 </div>
 
                 <!-- Dynamic fields injected here -->
-                <div id="dynamic-fields" style="display:contents"></div>
+                <div id="dynamic-fields"></div>
 
                 <!-- Page Numbers -->
                 <div class="field">
@@ -684,10 +684,17 @@ function updateDynamicFields() {
     let html = '';
     ['unit','lesson','task'].forEach(k => {
         if (prog[k]) {
-            html += `<div class="field"><label class="label">${prog[k]}</label><input id="${k}" placeholder="${prog[k]}..."></div>`;
+            html += `<div class="field"><label class="label">${prog[k]}</label><input id="${k}" class="dynamic-input" placeholder="${prog[k]}..."></div>`;
         }
     });
     dyn.innerHTML = html;
+    
+    // Reattach event listeners to new dynamic fields
+    const dynamicInputs = dyn.querySelectorAll('.dynamic-input');
+    dynamicInputs.forEach(input => {
+        input.addEventListener('input', updatePreview);
+        input.addEventListener('change', updatePreview);
+    });
 }
 
 function updatePreview() {
@@ -885,7 +892,7 @@ function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 
 // ── Events ────────────────────────────────────────────────────────────────
 document.addEventListener('input', e => {
-    if (['program','standards','material','page','format','delivery','audience','evidence','url','directions','unit','lesson','task'].includes(e.target.id)) updatePreview();
+    if (['program','standards','material','page','format','delivery','audience','evidence','url','directions'].includes(e.target.id)) updatePreview();
     if (['search-input'].includes(e.target.id)) renderLibrary();
 });
 document.addEventListener('change', e => {
