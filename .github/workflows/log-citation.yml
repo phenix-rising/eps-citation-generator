@@ -1,0 +1,75 @@
+name: Log Citation
+
+# Triggered by the EPS Citation Generator tool via repository_dispatch.
+# The client event type is "log_citation". The PAT never leaves GitHub's
+# infrastructure — the browser only sends citation data, not credentials.
+
+on:
+  repository_dispatch:
+    types: [log_citation]
+
+permissions:
+  contents: write   # needed to read and commit citations-log.json
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # ── 1. Check out the repo so we can read/write citations-log.json ──
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CITATION_LOG_TOKEN }}
+
+      # ── 2. Append the incoming citation to citations-log.json ──────────
+      - name: Append citation
+        env:
+          CITATION_ID:        ${{ github.event.client_payload.id }}
+          CITATION_PROGRAM:   ${{ github.event.client_payload.program }}
+          CITATION_TAGS:      ${{ toJson(github.event.client_payload.tags) }}
+          CITATION_TEXT:      ${{ github.event.client_payload.text }}
+          CITATION_CREATED:   ${{ github.event.client_payload.createdAt }}
+        run: |
+          LOG_FILE="citations-log.json"
+
+          # Create the file with an empty array if it doesn't exist yet
+          if [ ! -f "$LOG_FILE" ]; then
+            echo "[]" > "$LOG_FILE"
+          fi
+
+          # Build the new entry as JSON and append it to the array
+          python3 - <<'PYEOF'
+          import json, os
+
+          log_file = "citations-log.json"
+          with open(log_file, "r") as f:
+              log = json.load(f)
+
+          entry = {
+              "id":        os.environ.get("CITATION_ID", ""),
+              "program":   os.environ.get("CITATION_PROGRAM", ""),
+              "tags":      json.loads(os.environ.get("CITATION_TAGS", "[]")),
+              "text":      os.environ.get("CITATION_TEXT", ""),
+              "createdAt": os.environ.get("CITATION_CREATED", ""),
+              "loggedAt":  __import__("datetime").datetime.utcnow().isoformat() + "Z"
+          }
+
+          log.append(entry)
+
+          with open(log_file, "w") as f:
+              json.dump(log, f, indent=2, ensure_ascii=False)
+
+          print(f"Appended citation #{len(log)}: {entry['program']}")
+          PYEOF
+
+      # ── 3. Commit the updated log back to the repo ─────────────────────
+      - name: Commit log
+        run: |
+          git config user.name  "Citation Logger"
+          git config user.email "actions@github.com"
+          git add citations-log.json
+          git diff --cached --quiet || git commit -m \
+            "Log citation: ${{ github.event.client_payload.program }} [${{ github.event.client_payload.id }}]"
+          git push
