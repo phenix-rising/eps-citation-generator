@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS Citation Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .toast { transition: opacity 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-6 md:p-12 text-slate-900">
+
+    <header class="max-w-4xl mx-auto mb-8 border-b pb-6">
+        <h1 class="text-2xl font-black text-blue-900 tracking-tight uppercase">EPS Citation Generator</h1>
+    </header>
+
+    <main class="max-w-4xl mx-auto space-y-12">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">EPS Program Name</label>
+                    <input id="program" list="program-list" class="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="Start typing or select program...">
+                    <datalist id="program-list"></datalist>
+                </div>
+
+                <div class="flex flex-col gap-1.5 w-full">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Standards Code (Optional)</label>
+                    <input id="standards" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="e.g., RI.4.1">
+                </div>
+
+                <div class="flex flex-col gap-1.5 w-full">
+                    <div class="flex justify-between items-end">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Material Type</label>
+                        <label class="flex items-center gap-1 text-[9px] font-bold text-slate-600 cursor-pointer">
+                            <input type="checkbox" id="abbr-check"> ABBREVIATE
+                        </label>
+                    </div>
+                    <input id="material" list="material-list" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="Select or type material...">
+                    <datalist id="material-list"></datalist>
+                </div>
+
+                <div id="dynamic-fields" class="contents"></div>
+                
+                <div class="flex flex-col gap-1.5 w-full">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Page Number(s)</label>
+                    <input id="page" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="e.g., 42 or 64-68">
+                </div>
+
+                <div class="flex flex-col gap-1.5 w-full">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Format (Optional)</label>
+                    <select id="format" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
+                        <option value="">Select Option</option>
+                        <option value="Digital">Digital</option><option value="Print">Print</option><option value="Hybrid">Hybrid</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1.5 w-full">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Delivery Method (Optional)</label>
+                    <select id="delivery" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
+                        <option value="">Select Option</option>
+                        <option value="Whole Group">Whole Group</option><option value="Small Group">Small Group</option><option value="Direct Instruction">Direct Instruction</option><option value="Independent Practice">Independent Practice</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1.5 w-full">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Audience</label>
+                    <select id="audience" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
+                        <option value="">Select Option</option>
+                        <option value="Teacher">Teacher</option><option value="Student">Student</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1.5 w-full">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Evidence Type</label>
+                    <select id="evidence" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm">
+                        <option value="">Select Option</option>
+                        <option value="Narrative">Narrative</option><option value="Activity">Activity</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Evidence Web Link (URL)</label>
+                    <input id="url" class="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-sm mt-1" placeholder="https://...">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Short directions to locate cited evidence, where to look in the material, and/or cross-reference to other material type</label>
+                    <textarea id="directions" class="w-full p-3 border border-slate-300 rounded-md h-20 text-sm"></textarea>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-lg mt-8 text-white shadow-inner">
+                <p class="text-[10px] font-black text-slate-400 mb-2 uppercase">Live Preview</p>
+                <p id="preview-text" class="text-sm font-medium leading-relaxed">Citation will appear here...</p>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="handleCopy()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold text-xs uppercase hover:bg-slate-200 flex items-center gap-2"><i data-lucide="copy" class="w-3 h-3"></i>Copy</button>
+                <button onclick="handleSave()" class="px-4 py-2 bg-blue-800 text-white rounded-lg font-bold text-xs uppercase hover:bg-blue-900 flex items-center gap-2"><i data-lucide="file-text" class="w-3 h-3"></i>Save Citation</button>
+            </div>
+        </div>
+
+        <div class="border-t pt-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Saved Citations</h2>
+                <div id="lib-controls" class="hidden flex gap-2">
+                    <button onclick="selectAll()" class="px-3 py-1.5 text-xs font-bold text-slate-600 uppercase border border-slate-300 rounded hover:bg-slate-50">Select All</button>
+                    <button onclick="copySelected()" class="px-3 py-1.5 text-xs font-bold text-slate-600 uppercase border border-slate-300 rounded hover:bg-slate-50">Copy Selected</button>
+                    <button onclick="removeSelected()" class="px-3 py-1.5 text-xs font-bold text-red-600 uppercase border border-red-200 rounded hover:bg-red-50 flex items-center gap-1"><i data-lucide="trash-2" class="w-3 h-3"></i>Delete</button>
+                    <button onclick="exportCSV()" class="px-3 py-1.5 text-xs font-bold text-blue-700 uppercase border border-blue-200 rounded hover:bg-blue-50 flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i>Export CSV</button>
+                </div>
+            </div>
+            <div id="citation-list" class="grid gap-3"></div>
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-xs shadow-xl opacity-0 toast"></div>
+
+    <script>
+        // --- Registry ---
+        const PROGRAM_KEYS = [
+            { program: 'SPIRE Up', unit: 'Skill', lesson: 'Lesson', task: 'Activity' },
+            { program: 'SPIRE 4E', unit: 'Level', lesson: 'Lesson', task: 'Step' },
+            { program: 'SPIRE Foundations: Sounds Sensible', unit: 'Lesson', task: 'Step' },
+            { program: 'Megawords', unit: 'Book', lesson: 'Word List', task: 'Exercise' },
+            { program: 'Reading Accelerator', unit: 'Skill', lesson: 'Lesson', task: 'Activity' },
+            { program: 'SPIRE Next', unit: 'Level', lesson: 'Lesson', task: 'Read' },
+            { program: 'Wordly Wise', unit: 'Book', lesson: 'Lesson', task: 'Activity' },
+            { program: 'SPIRE Decodable Readers', unit: 'Level', lesson: 'Set', task: 'Reader' },
+            { program: 'Readfetti', unit: 'Skill Group', lesson: 'Book', task: 'Focus' },
+            { program: 'Vocabulary from Classical Roots', unit: 'Book', lesson: 'Lesson', task: 'Activity/Exercise' }
+        ];
+
+        const MATERIALS = [
+            { key: 'TE', name: 'Teacher Edition / Guide' }, { key: 'SE', name: 'Student Edition / Book' },
+            { key: 'SWB', name: 'Student Workbook' }, { key: 'BLM', name: 'Blackline Master' },
+            { key: 'TR', name: 'Teacher Resource' }, { key: 'SR', name: 'Student Resource' },
+            { key: 'DR', name: 'Decodable Reader' }, { key: 'RAC', name: 'Read-Aloud Cards' },
+            { key: 'WL', name: 'Word List' }, { key: 'EX', name: 'Exercise / Practice Sheet(s)' },
+            { key: 'GC', name: 'Game Cards' }, { key: 'LC', name: 'Letter Cards' },
+            { key: 'WC', name: 'Word Cards' }, { key: 'HWC', name: 'High-Frequency / Heart Word Cards' },
+            { key: 'PFC', name: 'Phonogram Flash Cards' }, { key: 'KWS', name: 'Key Word / Concept Sheet' },
+            { key: 'MC', name: 'Manipulative Cards / Tiles' }, { key: 'SMK', name: 'Student Manipulatives Kit' },
+            { key: 'PT', name: 'Placement Test' }, { key: 'ASMT', name: 'Assessment' },
+            { key: 'FP', name: 'Fluency Practice / Drill Sheet(s)' }, { key: 'RP', name: 'Reading Passage(s)' },
+            { key: 'UR', name: 'Unit Resource' }, { key: 'DTE', name: 'Digital Teacher Edition' },
+            { key: 'DSE', name: 'Digital Student Edition' }, { key: 'DSWB', name: 'Digital Student Workbook' },
+            { key: 'DTR', name: 'Digital Teacher Resource' }, { key: 'DSR', name: 'Digital Student Resource' },
+            { key: 'DA', name: 'Digital Activity' }, { key: 'DASMT', name: 'Digital Assessment' },
+            { key: 'DASH', name: 'Dashboard / Analytics' }, { key: 'DG', name: 'Digital Game / Interactive Tool' },
+            { key: 'DMR', name: 'Digital Manipulative Resource' }, { key: 'DFP', name: 'Digital Fluency Practice' }
+        ];
+
+        // --- State ---
+        let citations = JSON.parse(localStorage.getItem('eps_citations') || '[]');
+        let selectedIds = new Set();
+
+        // --- Init ---
+        const programInput = document.getElementById('program');
+        const materialInput = document.getElementById('material');
+        const pList = document.getElementById('program-list');
+        const mList = document.getElementById('material-list');
+        
+        PROGRAM_KEYS.forEach(p => pList.innerHTML += `<option value="${p.program}">`);
+        MATERIALS.forEach(m => mList.innerHTML += `<option value="${m.name}">${m.key} - ${m.name}</option>`);
+
+        // --- Logic ---
+        function updatePreview() {
+            const prog = PROGRAM_KEYS.find(p => p.program === programInput.value) || {};
+            const dyn = document.getElementById('dynamic-fields');
+            const currentHTML = dyn.innerHTML;
+            
+            // Only re-render if program changes structure
+            if (prog.unit || prog.lesson || prog.task) {
+                let html = '';
+                ['unit', 'lesson', 'task'].forEach(k => {
+                    if (prog[k]) {
+                        html += `<div class="flex flex-col gap-1.5 w-full"><label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">${prog[k]}</label><input id="${k}" class="px-3 py-2 border border-slate-300 rounded-md bg-white text-sm" placeholder="${prog[k]}..."></div>`;
+                    }
+                });
+                if(dyn.innerHTML !== html) dyn.innerHTML = html;
+            } else {
+                dyn.innerHTML = '';
+            }
+
+            // Calculate String
+            const materialVal = materialInput.value;
+            const isAbbr = document.getElementById('abbr-check').checked;
+            const matItem = MATERIALS.find(m => m.key === materialVal || m.name === materialVal);
+            const matDisplay = matItem ? (isAbbr ? matItem.key : matItem.name) : materialVal;
+
+            const parts = [
+                document.getElementById('standards').value,
+                programInput.value,
+                matDisplay,
+                document.getElementById('unit')?.value ? `${prog.unit}: ${document.getElementById('unit').value}` : null,
+                document.getElementById('lesson')?.value ? `${prog.lesson}: ${document.getElementById('lesson').value}` : null,
+                document.getElementById('task')?.value ? `${prog.task}: ${document.getElementById('task').value}` : null,
+                document.getElementById('page').value ? (/[\-,\s]/.test(document.getElementById('page').value.trim()) ? `pp. ${document.getElementById('page').value.trim()}` : `p. ${document.getElementById('page').value.trim()}`) : null,
+                document.getElementById('format').value,
+                document.getElementById('delivery').value,
+                document.getElementById('audience').value,
+                document.getElementById('evidence').value,
+                document.getElementById('directions').value
+            ].filter(Boolean);
+
+            const url = document.getElementById('url').value;
+            const final = parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
+            document.getElementById('preview-text').innerText = final || "Citation will appear here...";
+        }
+
+        function handleSave() {
+            const text = document.getElementById('preview-text').innerText;
+            if(!text || text.includes('appear here')) return;
+            const newCitation = { id: Date.now().toString(), text, program: programInput.value || 'Manual' };
+            citations = [newCitation, ...citations];
+            localStorage.setItem('eps_citations', JSON.stringify(citations));
+            showToast('Citation Saved');
+            renderLibrary();
+        }
+
+        function handleCopy() {
+            const text = document.getElementById('preview-text').innerText;
+            navigator.clipboard.writeText(text);
+            showToast('Copied to clipboard');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = 1;
+            setTimeout(() => t.style.opacity = 0, 2000);
+        }
+
+        function renderLibrary() {
+            const listEl = document.getElementById('citation-list');
+            const controls = document.getElementById('lib-controls');
+            controls.className = citations.length > 0 ? 'flex gap-2' : 'hidden';
+            listEl.innerHTML = citations.map(c => `
+                <div class="bg-white p-4 rounded-lg border border-slate-200 flex gap-4 items-start shadow-sm">
+                    <input type="checkbox" class="mt-1" onchange="toggleSelect('${c.id}')" ${selectedIds.has(c.id) ? 'checked' : ''}>
+                    <p class="text-xs text-slate-700 leading-relaxed font-medium">${c.text}</p>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function toggleSelect(id) {
+            if(selectedIds.has(id)) selectedIds.delete(id);
+            else selectedIds.add(id);
+            renderLibrary();
+        }
+
+        function selectAll() {
+            citations.forEach(c => selectedIds.add(c.id));
+            renderLibrary();
+        }
+
+        function copySelected() {
+            const text = citations.filter(c => selectedIds.has(c.id)).map(c => c.text).join('\n\n');
+            navigator.clipboard.writeText(text);
+            showToast('Copied selected');
+        }
+
+        function removeSelected() {
+            citations = citations.filter(c => !selectedIds.has(c.id));
+            selectedIds.clear();
+            localStorage.setItem('eps_citations', JSON.stringify(citations));
+            renderLibrary();
+        }
+
+        function exportCSV() {
+            const csv = "Program,Citation\n" + citations.map(c => `"${c.program}","${c.text.replace(/"/g, '""')}"`).join("\n");
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url; link.download = "citations.csv"; link.click();
+        }
+
+        // Listen for all inputs to update preview
+        document.addEventListener('input', (e) => {
+            if (['program', 'standards', 'material', 'abbr-check', 'page', 'format', 'delivery', 'audience', 'evidence', 'url', 'directions'].includes(e.target.id) || e.target.id === 'unit' || e.target.id === 'lesson' || e.target.id === 'task') {
+                updatePreview();
+            }
+        });
+
+        // Initialize
+        renderLibrary();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
