@@ -1054,7 +1054,7 @@ function buildCitationText() {
         v('delivery'), v('audience'), v('evidence'), v('directions')
     ].filter(Boolean);
     const url = v('url');
-    return parts.join(', ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
+    return parts.join('; ') + (url ? `. See: (${url.startsWith('http') ? url : 'https://' + url})` : '');
 }
 
 // Rebuilds the Unit/Lesson/Task inputs ONLY when the set of fields/labels changes.
