@@ -1044,12 +1044,16 @@ function buildCitationText() {
         }
     }
 
+    const unitLessonTask = [
+        v('unit')   ? `${labels.unit   || DEFAULT_FIELD_LABELS.unit} ${v('unit')}`     : null,
+        v('lesson') ? `${labels.lesson || DEFAULT_FIELD_LABELS.lesson} ${v('lesson')}` : null,
+        v('task')   ? `${labels.task   || DEFAULT_FIELD_LABELS.task}: ${v('task')}`     : null
+    ].filter(Boolean).join(', ');
+    
     const parts = [
         v('standards'), v('program'), getMaterialDisplay(),
         format,   // moved directly after material
-        v('unit')   ? `${labels.unit   || DEFAULT_FIELD_LABELS.unit}: ${v('unit')}`     : null,
-        v('lesson') ? `${labels.lesson || DEFAULT_FIELD_LABELS.lesson}: ${v('lesson')}` : null,
-        v('task')   ? `${labels.task   || DEFAULT_FIELD_LABELS.task}: ${v('task')}`     : null,
+        unitLessonTask || null,
         pageOrClickPath,
         v('delivery'), v('audience'), v('evidence'), v('directions')
     ].filter(Boolean);
