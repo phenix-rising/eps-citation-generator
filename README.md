@@ -1,8 +1,8 @@
-To ensure consistent alignment citations for EPS Learning programs, please follow the instructional guidelines provided below.
+To ensure consistent alignment citations for Instructional curriculum programs, please follow the instructional guidelines provided below.
 
-### AI Instruction: Generating EPS Alignment Citations
+### AI Model Instruction: Generating Alignment Citations
 
-**Objective:** Draft consistent, accurate, and properly formatted citation strings for EPS Learning programs based on specific structural requirements.
+**Objective:** Draft consistent, accurate, and properly formatted citation strings for Instructional curriculum programs based on specific structural requirements.
 
 ---
 
